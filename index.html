@@ -1,469 +1,452 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MCQ Question Bank FCPS/MRCP</title>
+    <title>YouTube Tag Extractor Pro</title>
     <style>
+        :root {
+            --yt-red: #FF0000;
+            --yt-red-darker: #cc0000;
+            --light-grey: #f0f0f0;
+            --medium-grey: #e0e0e0;
+            --dark-grey: #606060;
+            --text-color: #333;
+            --border-color: #ccc;
+            --success-bg: #d4edda;
+            --success-color: #155724;
+            --warning-bg: #fff3cd;
+            --warning-color: #856404;
+            --warning-border: #ffeeba;
+            --error-color: #dc3545;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            font-size: 14px;
+            font-family: 'Roboto', Arial, sans-serif;
             line-height: 1.6;
-            margin: 0;
-            padding: 0;
-            background-color: #f0f5ff;
-        }
-        .sidebar {
-            width: 250px;
-            background-color: #2c3e50;
-            color: white;
             padding: 20px;
-            height: 100vh;
-            position: fixed;
-            left: -290px;
-            top: 0;
-            transition: left 0.3s ease;
-            overflow-y: auto;
-            z-index: 1000;
+            background-color: var(--light-grey);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top */
+            min-height: 100vh;
+            margin: 0;
         }
-        .sidebar.expanded {
-            left: 0;
+
+        .container {
+            background-color: #fff;
+            padding: 30px 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            max-width: 700px;
+            width: 100%;
+            margin-top: 30px; /* Add some top margin */
         }
-        .sidebar-toggle {
-            position: fixed;
-            left: 10px;
-            top: 10px;
-            z-index: 1001;
-            background-color: #2c3e50;
+
+        h1 {
+            color: var(--yt-red);
+            text-align: center;
+            margin-bottom: 25px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px; /* Space between icon and text */
+        }
+        /* Simple SVG YouTube Icon */
+        h1 svg {
+            width: 32px;
+            height: 24px;
+            fill: var(--yt-red);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-grey);
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+            box-sizing: border-box; /* Include padding in width */
+            transition: border-color 0.2s ease;
+        }
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--yt-red);
+            box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.2);
+        }
+
+        button#extractButton {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: var(--yt-red);
             color: white;
             border: none;
-            padding: 8px;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            font-weight: 500;
             cursor: pointer;
+            transition: background-color 0.2s ease;
         }
-        .container {
-            padding: 20px;
-            transition: margin-left 0.3s ease;
+        button#extractButton:hover {
+            background-color: var(--yt-red-darker);
         }
-        .container.sidebar-expanded {
-            margin-left: 250px;
+        button#extractButton:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
         }
-        .content {
-            max-width: 800px;
-            margin: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+
+        #results {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--light-grey);
         }
-        h1 {
-            text-align: center;
-            color: #2c3e50;
+        #results h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: var(--dark-grey);
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+        #videoTitle {
+            font-weight: 500;
             margin-bottom: 20px;
-            font-size: 13px; /* Adjusted headline size */
+            font-size: 1.1rem;
         }
-        #topic-selector, #quiz-exam-button-container {
+
+        .tags-container {
+            margin-top: 15px;
+        }
+        .tags-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .tags-header h3 {
+             margin: 0;
+             color: var(--dark-grey);
+             font-size: 1.1rem;
+             font-weight: 500;
+        }
+        button#copyButton {
+            padding: 6px 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        button#copyButton:hover {
+            background-color: #0056b3;
+        }
+        button#copyButton:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        #copyFeedback {
+            font-size: 0.85rem;
+            color: var(--success-color);
+            margin-left: 10px;
+        }
+
+        .tags-list {
+            list-style: none;
+            padding: 0;
             display: flex;
             flex-wrap: wrap;
-            justify-content: space-between;
+            gap: 8px; /* Spacing between tags */
+        }
+        .tag-item {
+            background-color: var(--medium-grey);
+            color: var(--text-color);
+            padding: 5px 12px;
+            border-radius: 15px; /* Pill shape */
+            font-size: 0.9rem;
+            white-space: nowrap; /* Prevent tags from breaking line */
+        }
+
+        #statusMessage {
+            margin-top: 15px;
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        #statusMessage.error {
+            color: var(--error-color);
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        #statusMessage.info {
+            color: var(--dark-grey);
+            background-color: var(--light-grey);
+            border: 1px solid var(--medium-grey);
+        }
+        #statusMessage.loading {
+            color: #0c5460;
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+        }
+
+        .warning {
+            background-color: var(--warning-bg);
+            color: var(--warning-color);
+            border: 1px solid var(--warning-border);
+            padding: 10px 15px;
             margin-bottom: 20px;
-        }
-        .topic-button, #start-quiz, .add-question-button {
-            padding: 8px 16px;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            margin-bottom: 10px;
-            width: calc(50% - 10px);
+            border-radius: 4px;
+            font-size: 0.9em;
             text-align: center;
-        }
-        .topic-button:hover, #start-quiz:hover, .add-question-button:hover {
-            background-color: #2980b9;
-        }
-        .topic-button.active {
-            background-color: #2ecc71;
-        }
-        .home-button {
-            padding: 5px 10px;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: background-color 0.3s ease;
-            margin-bottom: 10px;
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            z-index: 1002;
-        }
-        .home-button:hover {
-            background-color: #2980b9;
-        }
-        #question-container {
-            display: none;
-            margin-bottom: 20px;
-            background-color: #f7f9fc;
-            padding: 15px;
-            border-radius: 8px;
-        }
-        #question-container h2 {
-            font-size: 13px;
-        }
-        .option {
-            display: block;
-            width: 100%;
-            margin: 5px 0;
-            padding: 10px;
-            background-color: #f0f0f0;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.1s ease;
-            font-size: 12px;
-            text-align: left;
-        }
-        .option:hover {
-            background-color: #e0e0e0;
-            transform: translateY(-2px);
-        }
-        .option.correct {
-            background-color: #a5d6a7 !important;
-        }
-        .option.incorrect {
-            background-color: #ef9a9a !important;
-        }
-        .control-buttons {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
-        }
-        .control-buttons button {
-            width: 30%;
-            padding: 5px;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: background-color 0.3s ease;
-        }
-        .control-buttons button:hover {
-            background-color: #2980b9;
-        }
-        #next-question {
-            background-color: #2ecc71;
-        }
-        #next-question:hover {
-            background-color: #27ae60;
-        }
-        #explanation-box {
-            margin-top: 20px;
-            padding: 20px;
-            background-color: #e8f5e9;
-            border-radius: 8px;
-            border-left: 5px solid #4caf50;
-            display: none;
-            font-size: 12px;
-        }
-        #explanation-box h3 {
-            margin-top: 0;
-            color: #2c3e50;
-        }
-        .sidebar-button {
-            display: block;
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s ease;
-        }
-        .sidebar-button:hover {
-            background-color: #2980b9;
-        }
-        #progress-bar {
-            width: 100%;
-            background-color: #f0f0f0;
-            border-radius: 5px;
-            margin-top: 20px;
-        }
-        #progress {
-            width: 0%;
-            height: 20px;
-            background-color: #4caf50;
-            border-radius: 5px;
-            transition: width 0.5s ease;
-        }
-        #timer {
-            text-align: center;
-            font-size: 16px;
-            margin-top: 10px;
-            color: #2c3e50;
-        }
-        #loading-indicator {
-            display: none;
-            text-align: center;
-            font-size: 16px;
-            color: #2c3e50;
-            margin: 20px 0;
         }
     </style>
 </head>
 <body>
-    <button class="sidebar-toggle" aria-label="Toggle Sidebar">☰</button>
-    <div class="sidebar" role="navigation">
-        <h2>MCQ Quiz</h2>
-        <button class="home-button" onclick="location.href='index.html'">Home</button>
-        <div id="progress-bar" aria-label="Progress Bar">
-            <div id="progress"></div>
-        </div>
-    </div>
-
     <div class="container">
-        <div class="content">
-            <h1>MCQ Question Bank FCPS/MRCP</h1>
-            <div id="topic-selector">
-                <button class="topic-button" data-topic="cardiology">Cardiology</button>
-                <button class="topic-button" data-topic="endocrinology">Endocrinology</button>
-                <button class="topic-button" data-topic="respiratory">Respiratory</button>
-                <button class="topic-button" data-topic="gastroenterology">Gastroenterology</button>
-                <button class="topic-button" data-topic="infectious-disease">Infectious Disease</button>
-                <button class="topic-button" data-topic="rheumatology">Rheumatology</button>
-            </div>
-            <div id="quiz-exam-button-container">
-                <button id="start-quiz" onclick="startQuiz()">Start Quiz Exam</button>
-                <button class="add-question-button" onclick="location.href='add_question.html'">Add Your Question</button>
-            </div>
-            <div id="loading-indicator">Loading questions, please wait...</div>
-            <div id="question-container"></div>
-            <div id="explanation-box">
-                <h3>Explanation:</h3>
-                <p id="explanation-text"></p>
-            </div>
-            <div class="control-buttons">
-                <button id="prev-question">Previous</button>
-                <button id="show-answer">Show Answer</button>
-                <button id="next-question">Next</button>
-            </div>
-            <div id="timer"></div>
+        <h1>
+            <svg viewBox="0 0 24 18" xmlns="http://www.w3.org/2000/svg"><path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.407-.501-9.407-.501s-7.537 0-9.407.501A3.007 3.007 0 0 0 .505 6.205a31.247 31.247 0 0 0-.505 5.59A31.247 31.247 0 0 0 .505 17.385a3.007 3.007 0 0 0 2.088 2.088c1.87.501 9.407.501 9.407.501s7.537 0 9.407-.501a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .505-5.59 31.247 31.247 0 0 0-.505-5.59zM9.609 14.81V8.19l6.156 3.31-6.156 3.31z"/></svg>
+            YouTube Tag Extractor
+        </h1>
+
+        <div class="warning">
+            <strong>Security Notice:</strong> API key is exposed client-side. For personal use only. Do not deploy publicly.
         </div>
+
+        <label for="videoUrl">YouTube Video URL (Standard or Shorts):</label>
+        <input type="text" id="videoUrl" placeholder="e.g., https://www.youtube.com/watch?v=dQw4w9WgXcQ or /shorts/...">
+
+        <button id="extractButton">Extract Tags</button>
+
+        <div id="results">
+            <!-- Content will be injected here by JavaScript -->
+        </div>
+        <div id="statusMessage" style="display: none;"></div>
     </div>
 
     <script>
-        const API_URL = 'https://sheetdb.io/api/v1/muiu7s7r2h8wy';
-        let questions = [];
-        let currentQuestionIndex = 0;
-        let currentTopic = '';
-        let timerInterval;
-        let questionTimer;
+        const apiKey = "AIzaSyBR5v5pn_8dmVToTXHB1ygMHu3odm6PK0I"; // <-- YOUR API KEY (INSECURE!)
+        const extractButton = document.getElementById('extractButton');
+        const videoUrlInput = document.getElementById('videoUrl');
+        const resultsDiv = document.getElementById('results');
+        const statusMessageDiv = document.getElementById('statusMessage');
 
-        const sidebarToggle = document.querySelector('.sidebar-toggle');
-        const sidebar = document.querySelector('.sidebar');
-        const container = document.querySelector('.container');
-        const loadingIndicator = document.getElementById('loading-indicator');
+        let currentTags = []; // To store tags for the copy function
 
-        sidebarToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('expanded');
-            container.classList.toggle('sidebar-expanded');
+        extractButton.addEventListener('click', getVideoInfo);
+        videoUrlInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                extractButton.click();
+            }
         });
 
-        async function fetchQuestions() {
-            try {
-                loadingIndicator.style.display = 'block';
-                const response = await fetch(API_URL);
-                loadingIndicator.style.display = 'none';
-                if (!response.ok) throw new Error('Network response was not ok');
-                questions = await response.json();
-                questions = questions.filter(q => q.question && q.option1 && q.option2 && q.option3 && q.option4 && q.option5 && q.correctAnswer);
-            } catch (error) {
-                console.error('Error fetching questions:', error);
-                alert('Failed to load questions. Please check your connection and try again.');
-            } finally {
-                loadingIndicator.style.display = 'none';
-            }
+        function displayStatus(message, type = 'info') {
+            statusMessageDiv.textContent = message;
+            statusMessageDiv.className = type; // 'info', 'error', 'loading'
+            statusMessageDiv.style.display = 'block';
         }
 
-        function displayQuestion() {
-            const questionContainer = document.getElementById('question-container');
-            const currentQuestion = questions[currentQuestionIndex];
+        function hideStatus() {
+            statusMessageDiv.style.display = 'none';
+            statusMessageDiv.textContent = '';
+            statusMessageDiv.className = '';
+        }
 
-            if (!currentQuestion) {
-                questionContainer.innerHTML = '<p>No more questions available for this topic.</p>';
-                document.getElementById('show-answer').style.display = 'none';
-                document.getElementById('prev-question').style.display = 'none';
-                clearInterval(questionTimer);
+        function clearResults() {
+            resultsDiv.innerHTML = '';
+            currentTags = [];
+            hideStatus();
+        }
+
+        function getVideoId(url) {
+            // Handles:
+            // - https://www.youtube.com/watch?v=VIDEO_ID
+            // - https://youtu.be/VIDEO_ID
+            // - https://www.youtube.com/embed/VIDEO_ID
+            // - https://www.youtube.com/shorts/VIDEO_ID
+            // - https://m.youtube.com/watch?v=VIDEO_ID
+            // - https://music.youtube.com/watch?v=VIDEO_ID (and similar)
+            const patterns = [
+                /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,        // Standard watch URL
+                /(?:https?:\/\/)?(?:www\.)?youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,      // Shorts URL
+                /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([a-zA-Z0-9_-]{11})/,                 // Shortened URL
+                /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,       // Embed URL
+                /(?:https?:\/\/)?(?:m\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,         // Mobile URL
+                /(?:https?:\/\/)?(?:music\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/     // Music URL
+            ];
+
+            for (const pattern of patterns) {
+                const match = url.match(pattern);
+                if (match && match[1]) {
+                    return match[1];
+                }
+            }
+             // Fallback for edge cases or simpler URLs if just the ID is pasted (though less likely)
+            const looseMatch = url.match(/([a-zA-Z0-9_-]{11})/);
+             if (looseMatch && looseMatch[1] && url.length < 30) { // Check length to avoid matching random strings in longer text
+                 return looseMatch[1];
+             }
+
+            return null; // No valid ID found
+        }
+
+
+        async function getVideoInfo() {
+            const url = videoUrlInput.value.trim();
+            clearResults(); // Clear previous results and status
+
+            if (!url) {
+                displayStatus('Please enter a YouTube video URL.', 'error');
                 return;
             }
 
-            questionContainer.style.display = 'block';
+            const videoId = getVideoId(url);
+            if (!videoId) {
+                displayStatus('Could not extract a valid YouTube Video ID from the URL. Please check the format.', 'error');
+                return;
+            }
 
-            const options = [
-                { label: 'a', text: currentQuestion.option1 },
-                { label: 'b', text: currentQuestion.option2 },
-                { label: 'c', text: currentQuestion.option3 },
-                { label: 'd', text: currentQuestion.option4 },
-                { label: 'e', text: currentQuestion.option5 }
-            ];
+            displayStatus('Fetching video data...', 'loading');
+            extractButton.disabled = true; // Disable button during fetch
 
-            questionContainer.innerHTML = `
-                <h2>Question ${currentQuestionIndex + 1}: ${currentQuestion.question}</h2>
-                ${options.map(option => `
-                    <button class="option" aria-label="Option ${option.label}">
-                        ${option.label.toUpperCase()}. ${option.text}
-                    </button>
-                `).join('')}
-            `;
+            const apiUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${apiKey}`;
 
-            document.getElementById('show-answer').style.display = 'block';
-            document.getElementById('prev-question').style.display = currentQuestionIndex > 0 ? 'block' : 'none';
-            document.getElementById('explanation-box').style.display = 'none';
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json(); // Attempt to parse JSON regardless of status
 
-            const optionButtons = document.querySelectorAll('.option');
-            optionButtons.forEach(button => {
-                button.addEventListener('click', handleOptionClick);
-            });
-
-            updateProgressBar();
-            startQuestionTimer();
-        }
-
-        function handleOptionClick(event) {
-            const selectedOption = event.target;
-            const currentQuestion = questions[currentQuestionIndex];
-            const correctAnswerText = currentQuestion[`option${currentQuestion.correctAnswer}`];
-
-            document.querySelectorAll('.option').forEach(option => {
-                option.disabled = true;
-                if (option.textContent.includes(correctAnswerText)) {
-                    option.classList.add('correct');
+                if (!response.ok) {
+                    let errorMessage = `API Error (${response.status})`;
+                    if (data && data.error && data.error.message) {
+                        errorMessage += `: ${data.error.message}`;
+                    } else {
+                         errorMessage += `. ${response.statusText || 'Unknown error'}`;
+                    }
+                     // Check for common quota issue
+                     if (response.status === 403) {
+                         errorMessage += " This might be due to an invalid API key or exceeded quota.";
+                     }
+                    throw new Error(errorMessage);
                 }
-            });
 
-            if (!selectedOption.textContent.includes(correctAnswerText)) {
-                selectedOption.classList.add('incorrect');
-            }
 
-            document.getElementById('show-answer').style.display = 'none';
-            showExplanation();
-        }
+                if (data.items && data.items.length > 0) {
+                    const snippet = data.items[0].snippet;
+                    const title = snippet.title;
+                    const tags = snippet.tags || []; // Use empty array if tags are null/undefined
 
-        function showExplanation() {
-            const currentQuestion = questions[currentQuestionIndex];
-            const explanationBox = document.getElementById('explanation-box');
-            const explanationText = document.getElementById('explanation-text');
+                    currentTags = tags; // Store tags for copying
 
-            explanationText.textContent = currentQuestion.explanation || 'No explanation available.';
-            explanationBox.style.display = 'block';
-        }
+                    // --- Display Results ---
+                    hideStatus(); // Hide loading message
 
-        document.getElementById('show-answer').addEventListener('click', () => {
-            const currentQuestion = questions[currentQuestionIndex];
-            const correctAnswerText = currentQuestion[`option${currentQuestion.correctAnswer}`];
+                    // Display Title
+                    const titleElement = document.createElement('h2');
+                    titleElement.id = 'videoTitle';
+                    titleElement.textContent = title || 'Video Title Not Found';
+                    resultsDiv.appendChild(titleElement);
 
-            document.querySelectorAll('.option').forEach(option => {
-                option.disabled = true;
-                if (option.textContent.includes(correctAnswerText)) {
-                    option.classList.add('correct');
+                    // Display Tags Section (even if empty)
+                    const tagsContainer = document.createElement('div');
+                    tagsContainer.className = 'tags-container';
+
+                    const tagsHeader = document.createElement('div');
+                    tagsHeader.className = 'tags-header';
+
+                    const tagsTitle = document.createElement('h3');
+                    tagsTitle.textContent = 'Tags';
+                    tagsHeader.appendChild(tagsTitle);
+
+                    if (tags.length > 0) {
+                        const copyButton = document.createElement('button');
+                        copyButton.id = 'copyButton';
+                        copyButton.textContent = 'Copy All Tags';
+                        copyButton.onclick = copyTagsToClipboard; // Assign function directly
+
+                         const copyFeedbackSpan = document.createElement('span');
+                         copyFeedbackSpan.id = 'copyFeedback';
+
+                        const buttonWrapper = document.createElement('div'); // Wrap button and feedback
+                        buttonWrapper.style.display = 'flex';
+                        buttonWrapper.style.alignItems = 'center';
+                        buttonWrapper.appendChild(copyButton);
+                        buttonWrapper.appendChild(copyFeedbackSpan);
+
+                        tagsHeader.appendChild(buttonWrapper);
+
+                        tagsContainer.appendChild(tagsHeader); // Add header first
+
+                        const tagList = document.createElement('ul');
+                        tagList.className = 'tags-list';
+                        tags.forEach(tag => {
+                            const listItem = document.createElement('li');
+                            listItem.className = 'tag-item';
+                            listItem.textContent = tag;
+                            tagList.appendChild(listItem);
+                        });
+                        tagsContainer.appendChild(tagList); // Add tag list after header
+                    } else {
+                         tagsContainer.appendChild(tagsHeader); // Add header
+                         const noTagsMessage = document.createElement('p');
+                         noTagsMessage.textContent = 'No tags found for this video.';
+                         noTagsMessage.style.color = 'var(--dark-grey)';
+                         noTagsMessage.style.fontSize = '0.95rem';
+                         tagsContainer.appendChild(noTagsMessage); // Add message after header
+                    }
+
+                    resultsDiv.appendChild(tagsContainer); // Add the whole tags section
+
+                } else {
+                    displayStatus('Video not found. Check the URL or Video ID.', 'error');
                 }
+
+            } catch (error) {
+                console.error("Error fetching video info:", error);
+                displayStatus(`An error occurred: ${error.message}`, 'error');
+            } finally {
+                 extractButton.disabled = false; // Re-enable button
+            }
+        }
+
+        function copyTagsToClipboard() {
+            if (currentTags.length === 0) return; // Should not happen if button is visible, but check anyway
+
+            const tagsString = currentTags.join(', '); // Join with comma and space
+            const copyButton = document.getElementById('copyButton');
+            const feedbackSpan = document.getElementById('copyFeedback');
+
+            navigator.clipboard.writeText(tagsString).then(() => {
+                // Success
+                if(copyButton) copyButton.textContent = 'Copied!';
+                if(feedbackSpan) feedbackSpan.textContent = '✓ Copied';
+
+                setTimeout(() => {
+                    if(copyButton) copyButton.textContent = 'Copy All Tags';
+                    if(feedbackSpan) feedbackSpan.textContent = '';
+                }, 2000); // Reset after 2 seconds
+
+            }).catch(err => {
+                // Error
+                console.error('Failed to copy tags: ', err);
+                if(feedbackSpan) feedbackSpan.textContent = 'Copy failed!';
+                 if(copyButton) copyButton.textContent = 'Copy Failed';
+                 setTimeout(() => {
+                    if(copyButton) copyButton.textContent = 'Copy All Tags';
+                    if(feedbackSpan) feedbackSpan.textContent = '';
+                }, 2000);
             });
-
-            document.getElementById('show-answer').style.display = 'none';
-            showExplanation();
-        });
-
-        document.getElementById('next-question').addEventListener('click', () => {
-            currentQuestionIndex++;
-            if (currentQuestionIndex >= questions.length) {
-                currentQuestionIndex = 0;
-            }
-            displayQuestion();
-        });
-
-        document.getElementById('prev-question').addEventListener('click', () => {
-            if (currentQuestionIndex > 0) {
-                currentQuestionIndex--;
-                displayQuestion();
-            }
-        });
-
-        document.querySelectorAll('.topic-button').forEach(button => {
-            button.addEventListener('click', async (event) => {
-                currentTopic = event.target.dataset.topic;
-                document.querySelectorAll('.topic-button').forEach(btn => btn.classList.remove('active'));
-                event.target.classList.add('active');
-                await fetchQuestions();
-                questions = questions.filter(q => q.topic.toLowerCase() === currentTopic.toLowerCase());
-                currentQuestionIndex = 0;
-                displayQuestion();
-                hideTopicButtons();
-                saveProgress();
-            });
-        });
-
-        function hideTopicButtons() {
-            document.querySelector('#topic-selector').style.display = 'none';
-            document.querySelector('#quiz-exam-button-container').style.display = 'none';
         }
 
-        function updateProgressBar() {
-            const progress = document.getElementById('progress');
-            const percentage = ((currentQuestionIndex + 1) / questions.length) * 100;
-            progress.style.width = `${percentage}%`;
-        }
-
-        function startQuiz() {
-            window.location.href = 'quiz_exam.html';
-        }
-
-        function saveProgress() {
-            localStorage.setItem('quizProgress', JSON.stringify({
-                currentTopic,
-                currentQuestionIndex,
-                questions
-            }));
-        }
-
-        function loadProgress() {
-            const savedProgress = localStorage.getItem('quizProgress');
-            if (savedProgress) {
-                const { currentTopic: savedTopic, currentQuestionIndex: savedIndex, questions: savedQuestions } = JSON.parse(savedProgress);
-                currentTopic = savedTopic;
-                currentQuestionIndex = savedIndex;
-                questions = savedQuestions;
-                displayQuestion();
-            }
-        }
-
-        function startQuestionTimer() {
-            clearInterval(questionTimer);
-            const timeLimit = 60; // 1 minute per question
-            let timer = timeLimit;
-
-            questionTimer = setInterval(() => {
-                if (timer <= 0) {
-                    clearInterval(questionTimer);
-                    alert('Time is up for this question!');
-                    document.getElementById('next-question').click();
-                }
-                timer--;
-            }, 1000);
-        }
-
-        window.addEventListener('load', () => {
-            loadProgress();
-            // Initially, no questions are shown until a topic is selected
-        });
     </script>
 </body>
 </html>
-.
