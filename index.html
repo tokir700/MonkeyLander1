@@ -3,411 +3,425 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Tag Extractor Pro</title>
+
+    <!-- SEO Meta Tags (Keep from previous version) -->
+    <title>YouTube Tag Extractor, Stats & Description Finder | Free Tool (2024)</title>
+    <meta name="description" content="Instantly extract tags, view descriptions, stats (views, likes), duration & more from any YouTube video or Short. Free online tool for video SEO & analysis.">
+    <meta name="keywords" content="youtube tag extractor, youtube description extractor, youtube video stats, view count, like count, video duration, find youtube tags, youtube video tags, youtube seo tool, video keywords, youtube shorts tags, free youtube tool, youtube tag finder, video description viewer, competitor analysis youtube">
+    <!-- Add canonical, og, twitter tags as before, replacing placeholders -->
+    <link rel="canonical" href="YOUR_CANONICAL_URL_HERE">
+    <meta property="og:title" content="Free YouTube Tag, Stats & Description Extractor Tool">
+    <meta property="og:description" content="Extract tags, description, view count, likes, duration & more from YouTube videos/Shorts. Optimize your video SEO.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="YOUR_OG_URL_HERE">
+    <meta name="twitter:card" content="summary">
+    <!-- ... other meta tags ... -->
+
     <style>
         :root {
             --yt-red: #FF0000;
             --yt-red-darker: #cc0000;
-            --light-grey: #f0f0f0;
+            --light-grey: #f4f4f4; /* Slightly lighter grey */
             --medium-grey: #e0e0e0;
             --dark-grey: #606060;
             --text-color: #333;
-            --border-color: #ccc;
+            --border-color: #ddd; /* Softer border */
             --success-bg: #d4edda;
             --success-color: #155724;
-            --warning-bg: #fff3cd;
-            --warning-color: #856404;
-            --warning-border: #ffeeba;
+            --info-bg: #d1ecf1;
+            --info-color: #0c5460;
+            --info-border: #bee5eb;
             --error-color: #dc3545;
+            --link-color: #007bff;
         }
 
         body {
-            font-family: 'Roboto', Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; /* System font stack */
             line-height: 1.6;
-            padding: 20px;
+            padding: 15px; /* Reduced padding for mobile */
             background-color: var(--light-grey);
             color: var(--text-color);
-            display: flex;
-            justify-content: center;
-            align-items: flex-start; /* Align to top */
-            min-height: 100vh;
             margin: 0;
         }
 
         .container {
             background-color: #fff;
-            padding: 30px 40px;
+            padding: 20px; /* Adjusted padding */
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            max-width: 700px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); /* Softer shadow */
+            max-width: 800px; /* Slightly wider max-width */
             width: 100%;
-            margin-top: 30px; /* Add some top margin */
+            margin: 20px auto; /* Centering */
+            box-sizing: border-box;
         }
 
         h1 {
-            color: var(--yt-red);
-            text-align: center;
-            margin-bottom: 25px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px; /* Space between icon and text */
+            color: var(--yt-red); text-align: center; margin-bottom: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1.6rem; /* Adjusted size */
         }
-        /* Simple SVG YouTube Icon */
-        h1 svg {
-            width: 32px;
-            height: 24px;
-            fill: var(--yt-red);
-        }
+        h1 svg { width: 28px; height: 20px; fill: var(--yt-red); } /* Slightly smaller icon */
+        h2 { color: var(--dark-grey); font-weight: 600; margin-top: 25px; margin-bottom: 15px; border-bottom: 1px solid var(--medium-grey); padding-bottom: 8px; font-size: 1.3rem; }
+        h3 { color: var(--dark-grey); font-weight: 600; margin-top: 20px; margin-bottom: 10px; font-size: 1.15rem;}
 
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--dark-grey);
-        }
+        .intro-text, .usage-guide, .benefits-section { margin-bottom: 20px; font-size: 0.95rem; /* Slightly smaller base text */ }
+        .intro-text p, .usage-guide p, .benefits-section p { margin-bottom: 8px; }
+        .usage-guide ol, .benefits-section ul { padding-left: 25px; margin-top: 5px;}
+        .usage-guide li, .benefits-section li { margin-bottom: 5px; }
 
-        input[type="text"] {
-            width: 100%;
-            padding: 12px 15px;
-            margin-bottom: 20px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 1rem;
-            box-sizing: border-box; /* Include padding in width */
-            transition: border-color 0.2s ease;
-        }
-        input[type="text"]:focus {
-            outline: none;
-            border-color: var(--yt-red);
-            box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.2);
-        }
+        .tool-section { border: 1px solid var(--border-color); padding: 20px; border-radius: 8px; margin-top: 20px; background-color: #fdfdfd; }
+        label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--dark-grey); font-size: 0.9rem; }
+        input[type="text"] { width: 100%; padding: 10px 12px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 1rem; box-sizing: border-box; transition: border-color 0.2s ease; background-color: #fff; -webkit-appearance: none; /* Prevent iOS zoom on focus */ }
+        input[type="text"]:focus { outline: none; border-color: var(--yt-red); box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.15); }
+        button#extractButton { display: block; width: 100%; padding: 12px; background-color: var(--yt-red); color: white; border: none; border-radius: 4px; font-size: 1.05rem; font-weight: 500; cursor: pointer; transition: background-color 0.2s ease; margin-top: 10px; -webkit-appearance: none; }
+        button#extractButton:hover { background-color: var(--yt-red-darker); }
+        button#extractButton:disabled { background-color: #ccc; cursor: not-allowed; opacity: 0.7; }
 
-        button#extractButton {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            background-color: var(--yt-red);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 1.1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-        button#extractButton:hover {
-            background-color: var(--yt-red-darker);
-        }
-        button#extractButton:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
+        #results { margin-top: 25px; padding-top: 15px; border-top: 1px solid var(--light-grey); }
+        .result-section { margin-bottom: 20px; padding: 15px; border: 1px solid var(--border-color); border-radius: 6px; background-color: #fff; }
+        .result-section h3 { margin-top: 0; margin-bottom: 15px; color: var(--dark-grey); font-size: 1.2rem; border-bottom: 1px solid var(--medium-grey); padding-bottom: 8px; font-weight: 600;}
 
-        #results {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid var(--light-grey);
+        /* Video Info Section Styling */
+        .video-main-info { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
+        @media (min-width: 600px) { /* Side-by-side thumbnail and details on larger screens */
+            .video-main-info { flex-direction: row; align-items: flex-start; }
+            .video-thumbnail { flex-shrink: 0; width: 160px; } /* Fixed width for thumbnail */
+            .video-details-main { flex-grow: 1; }
         }
-        #results h2 {
-            margin-top: 0;
-            margin-bottom: 15px;
-            color: var(--dark-grey);
-            font-size: 1.2rem;
-            font-weight: 500;
-        }
-        #videoTitle {
-            font-weight: 500;
-            margin-bottom: 20px;
-            font-size: 1.1rem;
-        }
+        .video-thumbnail img { display: block; width: 100%; max-width: 320px; /* Max width on mobile */ height: auto; border-radius: 4px; border: 1px solid var(--border-color); }
+        #videoTitle { font-weight: 600; font-size: 1.2rem; color: var(--text-color); margin: 0 0 10px 0; }
+        .video-channel { font-size: 0.95rem; color: var(--dark-grey); margin-bottom: 10px;}
+        .video-channel a { color: var(--link-color); text-decoration: none; }
+        .video-channel a:hover { text-decoration: underline; }
 
-        .tags-container {
-            margin-top: 15px;
-        }
-        .tags-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        .tags-header h3 {
-             margin: 0;
-             color: var(--dark-grey);
-             font-size: 1.1rem;
-             font-weight: 500;
-        }
-        button#copyButton {
-            padding: 6px 12px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-        button#copyButton:hover {
-            background-color: #0056b3;
-        }
-        button#copyButton:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
-        #copyFeedback {
-            font-size: 0.85rem;
-            color: var(--success-color);
-            margin-left: 10px;
-        }
+        /* Stats List Styling */
+        .stats-list { list-style: none; padding: 0; margin: 0; font-size: 0.9rem; color: var(--dark-grey); }
+        .stats-list li { margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+        .stats-list li svg { width: 16px; height: 16px; fill: currentColor; opacity: 0.8;}
+        .stats-list strong { font-weight: 500; color: var(--text-color); }
 
-        .tags-list {
-            list-style: none;
-            padding: 0;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px; /* Spacing between tags */
-        }
-        .tag-item {
-            background-color: var(--medium-grey);
-            color: var(--text-color);
-            padding: 5px 12px;
-            border-radius: 15px; /* Pill shape */
-            font-size: 0.9rem;
-            white-space: nowrap; /* Prevent tags from breaking line */
-        }
+        /* Description Container */
+        .description-container pre { background-color: #f9f9f9; border: 1px solid var(--medium-grey); border-radius: 4px; padding: 10px 12px; white-space: pre-wrap; word-wrap: break-word; max-height: 300px; overflow-y: auto; font-size: 0.9rem; color: var(--text-color); }
 
-        #statusMessage {
-            margin-top: 15px;
-            padding: 10px 15px;
-            border-radius: 4px;
-            font-weight: 500;
-        }
-        #statusMessage.error {
-            color: var(--error-color);
-            background-color: #f8d7da;
-            border: 1px solid #f5c6cb;
-        }
-        #statusMessage.info {
-            color: var(--dark-grey);
-            background-color: var(--light-grey);
-            border: 1px solid var(--medium-grey);
-        }
-        #statusMessage.loading {
-            color: #0c5460;
-            background-color: #d1ecf1;
-            border: 1px solid #bee5eb;
-        }
+        /* Tags Section */
+        .tags-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .tags-header h4 { margin: 0; color: var(--dark-grey); font-size: 1.1rem; font-weight: 600;}
+        button#copyButton { padding: 5px 10px; background-color: var(--link-color); color: white; border: none; border-radius: 4px; font-size: 0.85rem; cursor: pointer; transition: background-color 0.2s ease; -webkit-appearance: none; }
+        button#copyButton:hover { background-color: #0056b3; }
+        button#copyButton:disabled { background-color: #ccc; cursor: not-allowed; opacity: 0.7;}
+        #copyFeedback { font-size: 0.8rem; color: var(--success-color); margin-left: 8px; }
+        .tags-list { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+        .tag-item { background-color: var(--medium-grey); color: var(--text-color); padding: 4px 10px; border-radius: 15px; font-size: 0.85rem; white-space: nowrap; }
 
-        .warning {
-            background-color: var(--warning-bg);
-            color: var(--warning-color);
-            border: 1px solid var(--warning-border);
-            padding: 10px 15px;
-            margin-bottom: 20px;
-            border-radius: 4px;
-            font-size: 0.9em;
-            text-align: center;
-        }
+        /* Other Details Section */
+        .details-list { list-style: none; padding: 0; margin: 0; font-size: 0.9rem; color: var(--dark-grey); }
+        .details-list li { margin-bottom: 6px; }
+        .details-list dt { font-weight: 500; color: var(--text-color); display: inline; }
+        .details-list dd { display: inline; margin-left: 5px; }
+
+        .monetization-info p { background-color: var(--info-bg); color: var(--info-color); border: 1px solid var(--info-border); padding: 10px 15px; border-radius: 4px; font-size: 0.9rem; margin: 0; }
+
+        #statusMessage { margin: 15px 0; padding: 10px 15px; border-radius: 4px; font-weight: 500; font-size: 0.9rem;}
+        #statusMessage.error { color: var(--error-color); background-color: #f8d7da; border: 1px solid #f5c6cb; }
+        #statusMessage.info { color: var(--dark-grey); background-color: var(--light-grey); border: 1px solid var(--medium-grey); }
+        #statusMessage.loading { color: #0c5460; background-color: #d1ecf1; border: 1px solid #bee5eb; }
+
+        footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid var(--medium-grey); font-size: 0.85rem; color: var(--dark-grey); }
+        footer p { margin: 5px 0;}
+        .api-warning { display: none; } /* Keep API key warning hidden visually */
+
+        /* Simple SVG Icons for Stats */
+        .icon-eye:before { content: "👁️"; /* Fallback emoji */ }
+        .icon-thumbs-up:before { content: "👍"; }
+        .icon-comment:before { content: "💬"; }
+        .icon-calendar:before { content: "📅"; }
+        .icon-clock:before { content: "⏰"; }
+        /* You could replace these with actual SVG <path> data for better consistency */
+
     </style>
+
+    <!-- Schema.org Markup (Keep from previous version) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "YouTube Tag Extractor, Stats & Description Finder",
+      "description": "A free online tool to extract video tags, descriptions, view count, likes, duration and more from YouTube videos and Shorts.",
+      "applicationCategory": "BrowserApplication",
+      "operatingSystem": "Any",
+      "url": "YOUR_APPLICATION_URL_HERE",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "potentialAction": { "@type": "SearchAction", "target": "YOUR_APPLICATION_URL_HERE?videoUrl={video_url}", "query-input": "required name=video_url" }
+    }
+    </script>
 </head>
 <body>
     <div class="container">
         <h1>
-            <svg viewBox="0 0 24 18" xmlns="http://www.w3.org/2000/svg"><path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.407-.501-9.407-.501s-7.537 0-9.407.501A3.007 3.007 0 0 0 .505 6.205a31.247 31.247 0 0 0-.505 5.59A31.247 31.247 0 0 0 .505 17.385a3.007 3.007 0 0 0 2.088 2.088c1.87.501 9.407.501 9.407.501s7.537 0 9.407-.501a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .505-5.59 31.247 31.247 0 0 0-.505-5.59zM9.609 14.81V8.19l6.156 3.31-6.156 3.31z"/></svg>
-            YouTube Tag Extractor
+            <svg aria-label="YouTube Icon" viewBox="0 0 24 18" xmlns="http://www.w3.org/2000/svg"><path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.407-.501-9.407-.501s-7.537 0-9.407.501A3.007 3.007 0 0 0 .505 6.205a31.247 31.247 0 0 0-.505 5.59A31.247 31.247 0 0 0 .505 17.385a3.007 3.007 0 0 0 2.088 2.088c1.87.501 9.407.501 9.407.501s7.537 0 9.407-.501a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .505-5.59 31.247 31.247 0 0 0-.505-5.59zM9.609 14.81V8.19l6.156 3.31-6.156 3.31z"/></svg>
+            YouTube Video Inspector
         </h1>
 
-        <div class="warning">
-            <strong>Security Notice:</strong> API key is exposed client-side. For personal use only. Do not deploy publicly.
-        </div>
+        <section class="intro-text">
+             <h2>Extract YouTube Video Details Instantly</h2>
+             <p>Get valuable insights from any public YouTube video or Short. This free tool extracts **tags, description, view count, likes, duration, channel info, publish date**, and more. Simply paste the video URL below.</p>
+        </section>
 
-        <label for="videoUrl">YouTube Video URL (Standard or Shorts):</label>
-        <input type="text" id="videoUrl" placeholder="e.g., https://www.youtube.com/watch?v=dQw4w9WgXcQ or /shorts/...">
+        <!-- Tool Section -->
+        <section class="tool-section">
+            <h2>Extractor Tool</h2>
+            <label for="videoUrl">Enter YouTube Video URL:</label>
+            <input type="text" id="videoUrl" placeholder="e.g., https://www.youtube.com/watch?v=..." autocapitalize="none" autocorrect="off">
+            <button id="extractButton">Extract Video Info</button>
+            <div id="statusMessage" style="display: none;"></div>
+        </section>
 
-        <button id="extractButton">Extract Tags</button>
-
+        <!-- Results Area -->
         <div id="results">
-            <!-- Content will be injected here by JavaScript -->
+            <!-- Dynamic content injection point -->
         </div>
-        <div id="statusMessage" style="display: none;"></div>
+
+        <!-- SEO Content Sections (Keep as before) -->
+         <section class="benefits-section">
+            <h2>Why Extract Video Details?</h2>
+             <ul>
+                <li><strong>Optimize Video SEO:</strong> Find relevant keywords and tags used by successful videos.</li>
+                <li><strong>Analyze Competitors:</strong> Understand the strategy behind competitor videos (tags, description length, stats).</li>
+                <li><strong>Find Content Ideas:</strong> Analyze popular video tags and descriptions.</li>
+                <li><strong>Quickly Assess Videos:</strong> Get key stats (views, likes, duration) at a glance.</li>
+                <li><strong>Save Time:</strong> Avoid manually searching for tags or video details in source code.</li>
+            </ul>
+        </section>
+        <section class="usage-guide">
+             <h2>How to Use</h2>
+             <ol>
+                 <li>Copy the URL of the YouTube video or Short.</li>
+                 <li>Paste the URL into the input box above.</li>
+                 <li>Click "Extract Video Info".</li>
+                 <li>View the detailed results, including title, stats, description, and tags.</li>
+                 <li>Use the "Copy All Tags" button if needed.</li>
+             </ol>
+         </section>
+
+        <footer>
+            <p>© 2024 Your Website Name. All rights reserved.</p>
+            <p>Uses YouTube Data API v3. Not affiliated with YouTube.</p>
+            <!-- Keep the API Key Warning here in comments for your reference! -->
+            <!-- !!! SECURITY WARNING !!! API Key is exposed client-side below. -->
+            <p class="api-warning">API Key Warning: For developer reference only, key exposed.</p>
+        </footer>
     </div>
 
     <script>
-        const apiKey = "AIzaSyBR5v5pn_8dmVToTXHB1ygMHu3odm6PK0I"; // <-- YOUR API KEY (INSECURE!)
+        const apiKey = "AIzaSyBR5v5pn_8dmVToTXHB1ygMHu3odm6PK0I"; // <-- STILL INSECURE HERE
         const extractButton = document.getElementById('extractButton');
         const videoUrlInput = document.getElementById('videoUrl');
         const resultsDiv = document.getElementById('results');
         const statusMessageDiv = document.getElementById('statusMessage');
 
-        let currentTags = []; // To store tags for the copy function
+        let currentTags = [];
 
+        // --- Helper Functions ---
+        function formatNumber(num) {
+            if (num === undefined || num === null) return 'N/A';
+            return parseInt(num).toLocaleString();
+        }
+
+        function formatIsoDuration(isoDuration) {
+            if (!isoDuration) return 'N/A';
+            const regex = /P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)W)?(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/;
+            const matches = isoDuration.match(regex);
+            if (!matches) return 'N/A';
+
+            const hours = parseInt(matches[5] || 0);
+            const minutes = parseInt(matches[6] || 0);
+            const seconds = parseInt(matches[7] || 0);
+
+            let formatted = '';
+            if (hours > 0) {
+                formatted += hours + ':';
+                formatted += minutes.toString().padStart(2, '0') + ':';
+            } else {
+                formatted += minutes + ':';
+            }
+            formatted += seconds.toString().padStart(2, '0');
+            return formatted;
+        }
+
+         function formatIsoDate(isoDate) {
+            if (!isoDate) return 'N/A';
+            try {
+                const date = new Date(isoDate);
+                return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+            } catch (e) {
+                return 'N/A';
+            }
+         }
+
+        // --- Core Functions ---
         extractButton.addEventListener('click', getVideoInfo);
-        videoUrlInput.addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                extractButton.click();
-            }
-        });
+        videoUrlInput.addEventListener('keypress', (event) => { if (event.key === 'Enter') { event.preventDefault(); extractButton.click(); } });
 
-        function displayStatus(message, type = 'info') {
-            statusMessageDiv.textContent = message;
-            statusMessageDiv.className = type; // 'info', 'error', 'loading'
-            statusMessageDiv.style.display = 'block';
+        function displayStatus(message, type = 'info') { /* ... (keep as is) ... */
+             statusMessageDiv.textContent = message; statusMessageDiv.className = type; statusMessageDiv.style.display = 'block';
         }
-
-        function hideStatus() {
-            statusMessageDiv.style.display = 'none';
-            statusMessageDiv.textContent = '';
-            statusMessageDiv.className = '';
+        function hideStatus() { /* ... (keep as is) ... */
+             statusMessageDiv.style.display = 'none'; statusMessageDiv.textContent = ''; statusMessageDiv.className = '';
         }
-
-        function clearResults() {
-            resultsDiv.innerHTML = '';
-            currentTags = [];
-            hideStatus();
+        function clearResults() { /* ... (keep as is) ... */
+             resultsDiv.innerHTML = ''; currentTags = []; hideStatus();
         }
-
-        function getVideoId(url) {
-            // Handles:
-            // - https://www.youtube.com/watch?v=VIDEO_ID
-            // - https://youtu.be/VIDEO_ID
-            // - https://www.youtube.com/embed/VIDEO_ID
-            // - https://www.youtube.com/shorts/VIDEO_ID
-            // - https://m.youtube.com/watch?v=VIDEO_ID
-            // - https://music.youtube.com/watch?v=VIDEO_ID (and similar)
-            const patterns = [
-                /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,        // Standard watch URL
-                /(?:https?:\/\/)?(?:www\.)?youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,      // Shorts URL
-                /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([a-zA-Z0-9_-]{11})/,                 // Shortened URL
-                /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,       // Embed URL
-                /(?:https?:\/\/)?(?:m\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,         // Mobile URL
-                /(?:https?:\/\/)?(?:music\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/     // Music URL
-            ];
-
-            for (const pattern of patterns) {
-                const match = url.match(pattern);
-                if (match && match[1]) {
-                    return match[1];
-                }
-            }
-             // Fallback for edge cases or simpler URLs if just the ID is pasted (though less likely)
-            const looseMatch = url.match(/([a-zA-Z0-9_-]{11})/);
-             if (looseMatch && looseMatch[1] && url.length < 30) { // Check length to avoid matching random strings in longer text
-                 return looseMatch[1];
-             }
-
-            return null; // No valid ID found
+        function getVideoId(url) { /* ... (keep as is) ... */
+             const patterns = [/(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/, /(?:https?:\/\/)?(?:www\.)?youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/, /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([a-zA-Z0-9_-]{11})/, /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/, /(?:https?:\/\/)?(?:m\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/, /(?:https?:\/\/)?(?:music\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/];
+             for (const pattern of patterns) { const match = url.match(pattern); if (match && match[1]) return match[1]; }
+             const looseMatch = url.match(/([a-zA-Z0-9_-]{11})/); if (looseMatch && looseMatch[1] && url.length < 30) return looseMatch[1];
+             return null;
         }
-
 
         async function getVideoInfo() {
             const url = videoUrlInput.value.trim();
-            clearResults(); // Clear previous results and status
+            clearResults();
 
-            if (!url) {
-                displayStatus('Please enter a YouTube video URL.', 'error');
-                return;
-            }
-
+            if (!url) { displayStatus('Please enter a YouTube video URL.', 'error'); return; }
             const videoId = getVideoId(url);
-            if (!videoId) {
-                displayStatus('Could not extract a valid YouTube Video ID from the URL. Please check the format.', 'error');
-                return;
-            }
+            if (!videoId) { displayStatus('Could not extract a valid YouTube Video ID from the URL.', 'error'); return; }
 
-            displayStatus('Fetching video data...', 'loading');
-            extractButton.disabled = true; // Disable button during fetch
+            displayStatus('Fetching video details...', 'loading');
+            extractButton.disabled = true;
 
-            const apiUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${apiKey}`;
+            // Request snippet, statistics, contentDetails, status
+            const parts = 'snippet,statistics,contentDetails,status';
+            const apiUrl = `https://www.googleapis.com/youtube/v3/videos?part=${parts}&id=${videoId}&key=${apiKey}`;
 
             try {
                 const response = await fetch(apiUrl);
-                const data = await response.json(); // Attempt to parse JSON regardless of status
+                const data = await response.json();
 
                 if (!response.ok) {
-                    let errorMessage = `API Error (${response.status})`;
-                    if (data && data.error && data.error.message) {
-                        errorMessage += `: ${data.error.message}`;
-                    } else {
-                         errorMessage += `. ${response.statusText || 'Unknown error'}`;
-                    }
-                     // Check for common quota issue
-                     if (response.status === 403) {
-                         errorMessage += " This might be due to an invalid API key or exceeded quota.";
-                     }
-                    throw new Error(errorMessage);
+                     let errorMessage = `API Error (${response.status})`; if (data?.error?.message) { errorMessage += `: ${data.error.message}`; } else { errorMessage += `. ${response.statusText || 'Unknown API error'}`; } if (response.status === 403) { errorMessage += " Check API key validity or quota."; } throw new Error(errorMessage);
                 }
 
-
                 if (data.items && data.items.length > 0) {
-                    const snippet = data.items[0].snippet;
-                    const title = snippet.title;
-                    const tags = snippet.tags || []; // Use empty array if tags are null/undefined
+                    const video = data.items[0];
+                    const snippet = video.snippet || {};
+                    const stats = video.statistics || {};
+                    const details = video.contentDetails || {};
+                    const status = video.status || {};
 
-                    currentTags = tags; // Store tags for copying
+                    currentTags = snippet.tags || [];
+                    hideStatus();
+                    resultsDiv.innerHTML = ''; // Clear previous results
 
-                    // --- Display Results ---
-                    hideStatus(); // Hide loading message
+                    // --- Build Results HTML ---
 
-                    // Display Title
-                    const titleElement = document.createElement('h2');
-                    titleElement.id = 'videoTitle';
-                    titleElement.textContent = title || 'Video Title Not Found';
-                    resultsDiv.appendChild(titleElement);
+                    // 1. Main Info Section (Thumbnail, Title, Channel, Basic Stats)
+                    const mainInfoSection = document.createElement('div');
+                    mainInfoSection.className = 'result-section video-main-info';
 
-                    // Display Tags Section (even if empty)
-                    const tagsContainer = document.createElement('div');
-                    tagsContainer.className = 'tags-container';
-
-                    const tagsHeader = document.createElement('div');
-                    tagsHeader.className = 'tags-header';
-
-                    const tagsTitle = document.createElement('h3');
-                    tagsTitle.textContent = 'Tags';
-                    tagsHeader.appendChild(tagsTitle);
-
-                    if (tags.length > 0) {
-                        const copyButton = document.createElement('button');
-                        copyButton.id = 'copyButton';
-                        copyButton.textContent = 'Copy All Tags';
-                        copyButton.onclick = copyTagsToClipboard; // Assign function directly
-
-                         const copyFeedbackSpan = document.createElement('span');
-                         copyFeedbackSpan.id = 'copyFeedback';
-
-                        const buttonWrapper = document.createElement('div'); // Wrap button and feedback
-                        buttonWrapper.style.display = 'flex';
-                        buttonWrapper.style.alignItems = 'center';
-                        buttonWrapper.appendChild(copyButton);
-                        buttonWrapper.appendChild(copyFeedbackSpan);
-
-                        tagsHeader.appendChild(buttonWrapper);
-
-                        tagsContainer.appendChild(tagsHeader); // Add header first
-
-                        const tagList = document.createElement('ul');
-                        tagList.className = 'tags-list';
-                        tags.forEach(tag => {
-                            const listItem = document.createElement('li');
-                            listItem.className = 'tag-item';
-                            listItem.textContent = tag;
-                            tagList.appendChild(listItem);
-                        });
-                        tagsContainer.appendChild(tagList); // Add tag list after header
-                    } else {
-                         tagsContainer.appendChild(tagsHeader); // Add header
-                         const noTagsMessage = document.createElement('p');
-                         noTagsMessage.textContent = 'No tags found for this video.';
-                         noTagsMessage.style.color = 'var(--dark-grey)';
-                         noTagsMessage.style.fontSize = '0.95rem';
-                         tagsContainer.appendChild(noTagsMessage); // Add message after header
+                    // Thumbnail
+                    const thumbDiv = document.createElement('div');
+                    thumbDiv.className = 'video-thumbnail';
+                    const thumbUrl = snippet.thumbnails?.medium?.url || snippet.thumbnails?.default?.url || ''; // Get best available thumbnail
+                    if (thumbUrl) {
+                        const img = document.createElement('img');
+                        img.src = thumbUrl;
+                        img.alt = `Thumbnail for ${snippet.title || 'video'}`;
+                        thumbDiv.appendChild(img);
                     }
+                    mainInfoSection.appendChild(thumbDiv);
 
-                    resultsDiv.appendChild(tagsContainer); // Add the whole tags section
+                    // Details Column
+                    const detailsDiv = document.createElement('div');
+                    detailsDiv.className = 'video-details-main';
+
+                    const titleElement = document.createElement('h3'); // Use h3 for title in results
+                    titleElement.id = 'videoTitle';
+                    titleElement.textContent = snippet.title || 'N/A';
+                    detailsDiv.appendChild(titleElement);
+
+                     const channelElement = document.createElement('p');
+                     channelElement.className = 'video-channel';
+                     if (snippet.channelTitle && snippet.channelId) {
+                         channelElement.innerHTML = `By: <a href="https://www.youtube.com/channel/${snippet.channelId}" target="_blank" rel="noopener noreferrer">${snippet.channelTitle}</a>`;
+                     } else {
+                          channelElement.textContent = `Channel: ${snippet.channelTitle || 'N/A'}`;
+                     }
+                    detailsDiv.appendChild(channelElement);
+
+                    const statsList = document.createElement('ul');
+                    statsList.className = 'stats-list';
+                    statsList.innerHTML = `
+                        <li><span class="icon-eye" title="Views"></span><strong>${formatNumber(stats.viewCount)}</strong> Views</li>
+                        <li><span class="icon-thumbs-up" title="Likes"></span><strong>${formatNumber(stats.likeCount) || 'Likes Hidden'}</strong> Likes</li>
+                        <li><span class="icon-comment" title="Comments"></span><strong>${formatNumber(stats.commentCount) || 'Comments Disabled'}</strong> Comments</li>
+                        <li><span class="icon-calendar" title="Published Date"></span>Published: <strong>${formatIsoDate(snippet.publishedAt)}</strong></li>
+                        <li><span class="icon-clock" title="Duration"></span>Duration: <strong>${formatIsoDuration(details.duration)}</strong></li>
+                    `;
+                    detailsDiv.appendChild(statsList);
+                    mainInfoSection.appendChild(detailsDiv);
+                    resultsDiv.appendChild(mainInfoSection);
+
+
+                    // 2. Description Section
+                    const descriptionSection = document.createElement('div');
+                    descriptionSection.className = 'result-section description-container';
+                    descriptionSection.innerHTML = `<h3>Description</h3>`;
+                    const descriptionContent = document.createElement('pre');
+                    descriptionContent.id = 'videoDescription';
+                    descriptionContent.textContent = snippet.description ? snippet.description.trim() : 'No description provided.';
+                    descriptionSection.appendChild(descriptionContent);
+                    resultsDiv.appendChild(descriptionSection);
+
+                    // 3. Tags Section
+                    const tagsSection = document.createElement('div');
+                    tagsSection.className = 'result-section tags-container';
+                    const tagsHeaderDiv = document.createElement('div');
+                    tagsHeaderDiv.className = 'tags-header';
+                    tagsHeaderDiv.innerHTML = `<h4>Extracted Tags</h4>`; // h4 for sub-sub heading
+
+                    if (currentTags.length > 0) {
+                        const copyButton = document.createElement('button'); copyButton.id = 'copyButton'; copyButton.textContent = 'Copy Tags'; copyButton.onclick = copyTagsToClipboard;
+                        const copyFeedbackSpan = document.createElement('span'); copyFeedbackSpan.id = 'copyFeedback';
+                        const buttonWrapper = document.createElement('div'); buttonWrapper.style.display = 'flex'; buttonWrapper.style.alignItems = 'center';
+                        buttonWrapper.appendChild(copyButton); buttonWrapper.appendChild(copyFeedbackSpan);
+                        tagsHeaderDiv.appendChild(buttonWrapper);
+                        tagsSection.appendChild(tagsHeaderDiv);
+
+                        const tagList = document.createElement('ul'); tagList.className = 'tags-list';
+                        currentTags.forEach(tag => { const li = document.createElement('li'); li.className = 'tag-item'; li.textContent = tag; tagList.appendChild(li); });
+                        tagsSection.appendChild(tagList);
+                    } else {
+                        tagsSection.appendChild(tagsHeaderDiv);
+                        tagsSection.innerHTML += '<p style="font-size: 0.9rem; color: var(--dark-grey);">No tags found for this video.</p>';
+                    }
+                    resultsDiv.appendChild(tagsSection);
+
+                    // 4. Other Details Section
+                    const otherDetailsSection = document.createElement('div');
+                    otherDetailsSection.className = 'result-section other-details';
+                    otherDetailsSection.innerHTML = `<h3>Other Details</h3>`;
+                    const detailsList = document.createElement('dl');
+                    detailsList.className = 'details-list';
+                    detailsList.innerHTML = `
+                        <li><dt>Definition:</dt> <dd>${(details.definition || 'N/A').toUpperCase()}</dd></li>
+                        <li><dt>Captions:</dt> <dd>${details.caption === 'true' ? 'Available' : 'None'}</dd></li>
+                        <li><dt>License:</dt> <dd>${status.license === 'youtube' ? 'Standard YouTube' : 'Creative Commons'}</dd></li>
+                        <li><dt>Embeddable:</dt> <dd>${status.embeddable ? 'Yes' : 'No'}</dd></li>
+                        <li><dt>Public Stats:</dt> <dd>${status.publicStatsViewable ? 'Visible' : 'Hidden'}</dd></li>
+                    `;
+                    otherDetailsSection.appendChild(detailsList);
+                    resultsDiv.appendChild(otherDetailsSection);
+
+                    // 5. Monetization Info (Informational Only)
+                    const monetizationSection = document.createElement('div');
+                    monetizationSection.className = 'result-section monetization-info';
+                    monetizationSection.innerHTML = `
+                        <h3>Monetization Status</h3>
+                        <p><strong>Note:</strong> A reliable monetization check is not possible using only the public YouTube Data API. This API does not provide direct information on whether a video serves ads for the creator.</p>
+                    `;
+                    resultsDiv.appendChild(monetizationSection);
+
 
                 } else {
-                    displayStatus('Video not found. Check the URL or Video ID.', 'error');
+                    displayStatus('Video not found. Please check the URL or Video ID.', 'error');
                 }
 
             } catch (error) {
@@ -418,32 +432,16 @@
             }
         }
 
-        function copyTagsToClipboard() {
-            if (currentTags.length === 0) return; // Should not happen if button is visible, but check anyway
-
-            const tagsString = currentTags.join(', '); // Join with comma and space
-            const copyButton = document.getElementById('copyButton');
-            const feedbackSpan = document.getElementById('copyFeedback');
-
+        function copyTagsToClipboard() { /* ... (keep function as is) ... */
+            if (currentTags.length === 0) return;
+            const tagsString = currentTags.join(', ');
+            const copyButton = document.getElementById('copyButton'); const feedbackSpan = document.getElementById('copyFeedback');
             navigator.clipboard.writeText(tagsString).then(() => {
-                // Success
-                if(copyButton) copyButton.textContent = 'Copied!';
-                if(feedbackSpan) feedbackSpan.textContent = '✓ Copied';
-
-                setTimeout(() => {
-                    if(copyButton) copyButton.textContent = 'Copy All Tags';
-                    if(feedbackSpan) feedbackSpan.textContent = '';
-                }, 2000); // Reset after 2 seconds
-
+                if(copyButton) copyButton.textContent = 'Copied!'; if(feedbackSpan) feedbackSpan.textContent = '✓';
+                setTimeout(() => { if(copyButton) copyButton.textContent = 'Copy Tags'; if(feedbackSpan) feedbackSpan.textContent = ''; }, 1500);
             }).catch(err => {
-                // Error
-                console.error('Failed to copy tags: ', err);
-                if(feedbackSpan) feedbackSpan.textContent = 'Copy failed!';
-                 if(copyButton) copyButton.textContent = 'Copy Failed';
-                 setTimeout(() => {
-                    if(copyButton) copyButton.textContent = 'Copy All Tags';
-                    if(feedbackSpan) feedbackSpan.textContent = '';
-                }, 2000);
+                console.error('Failed to copy tags: ', err); if(copyButton) copyButton.textContent = 'Failed'; if(feedbackSpan) feedbackSpan.textContent = 'Error!';
+                 setTimeout(() => { if(copyButton) copyButton.textContent = 'Copy Tags'; if(feedbackSpan) feedbackSpan.textContent = ''; }, 1500);
             });
         }
 
