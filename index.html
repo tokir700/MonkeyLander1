@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Planet Lander Deluxe</title>
+    <title>Planet Lander Deluxe v2</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap'); /* Sci-fi font */
 
@@ -148,7 +148,7 @@
 </div>
 
 <script>
-    // --- Core Variables --- (Most are same as previous)
+    // --- Core Variables ---
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     const controlsDiv = document.getElementById('controls');
@@ -163,42 +163,187 @@
     let canvasWidth, canvasHeight;
     let gameState = 'menu';
     let currentLevelIndex = 0;
-    const TOTAL_LEVELS = 5;
+    const TOTAL_LEVELS = 15; // <-- Increased total levels
     let screenShake = { intensity: 0, duration: 0 };
 
-    // --- Physics & Gameplay Constants --- (Kept low sensitivity)
-    const GRAVITY = 0.035;        // Slightly higher gravity for feel
-    const THRUST_POWER = 0.09;   // Adjusted thrust
-    const LATERAL_THRUST = 0.045; // Adjusted lateral
-    const FRICTION = 0.99;       // Slightly more friction
-    const FUEL_CONSUMPTION = 0.07; // Slightly less fuel use
+    // --- Physics & Gameplay Constants ---
+    const GRAVITY = 0.035;
+    const THRUST_POWER = 0.07;   // <-- Less sensitive
+    const LATERAL_THRUST = 0.035; // <-- Less sensitive
+    const FRICTION = 0.99;
+    const FUEL_CONSUMPTION = 0.07;
     const MAX_FUEL = 100;
     const STARTING_LIVES = 3;
-    const MAX_LANDING_SPEED_Y = 1.2; // Stricter Y
-    const MAX_LANDING_SPEED_X = 0.9; // Stricter X
-    const BANANA_POINTS = 150;      // More points
-    const LANDING_BONUS = 750;      // Higher bonus
-    const FUEL_BONUS_MULTIPLIER = 3; // Better fuel bonus
+    const MAX_LANDING_SPEED_Y = 1.2;
+    const MAX_LANDING_SPEED_X = 0.9;
+    const BANANA_POINTS = 150;
+    const LANDING_BONUS = 750;
+    const FUEL_BONUS_MULTIPLIER = 3;
+    const MAX_PARTICLES = 300; // Optimization: Limit particles
 
     // --- Game State ---
     let player = {};
     let platform = {};
     let bananas = [];
-    let starLayers = [[], [], []]; // 3 layers for parallax
+    let starLayers = [[], [], []];
     let distantPlanet = {};
     let particles = [];
     let input = { left: false, right: false, up: false };
     let score = 0;
     let lives = STARTING_LIVES;
     let fuel = MAX_FUEL;
-    let thrusting = false;
+    let thrusting = false; // Tracks if thrust key is held
+    let wasThrusting = false; // Tracks previous frame thrust state for sound
     let messageCallback = null;
-    let gameTime = 0; // For animations
+    let gameTime = 0;
 
-    // --- Level Data --- (Same as before)
-    const levels = [ { startPos: { x: 100, y: 50 }, platform: { xRatio: 0.5, yOffset: 30, width: 120, height: 14 }, bananas: [ { xRatio: 0.2, yRatio: 0.4 }, { xRatio: 0.8, yRatio: 0.6 } ] }, { startPos: { x: 50, y: 50 }, platform: { xRatio: 0.7, yOffset: 30, width: 90, height: 14 }, bananas: [ { xRatio: 0.25, yRatio: 0.3 }, { xRatio: 0.5, yRatio: 0.7 }, { xRatio: 0.85, yRatio: 0.5 } ] }, { startPos: { x: 700, y: 60 }, platform: { xRatio: 0.2, yOffset: 40, width: 100, height: 16 }, bananas: [ { xRatio: 0.4, yRatio: 0.4 }, { xRatio: 0.6, yRatio: 0.8 }, { xRatio: 0.1, yRatio: 0.6 } ] }, { startPos: { x: 100, y: 450 }, platform: { xRatio: 0.5, yOffset: 150, width: 80, height: 14 }, bananas: [ { xRatio: 0.15, yRatio: 0.2 }, { xRatio: 0.85, yRatio: 0.2 }, { xRatio: 0.5, yRatio: 0.5 }, { xRatio: 0.5, yRatio: 0.1 } ] }, { startPos: { x: 400, y: 50 }, platform: { xRatio: 0.9, yOffset: 35, width: 70, height: 14 }, bananas: [ { xRatio: 0.1, yRatio: 0.8 }, { xRatio: 0.3, yRatio: 0.3 }, { xRatio: 0.6, yRatio: 0.6 }, { xRatio: 0.8, yRatio: 0.2 } ] } ];
+    // --- Audio ---
+    let audioCtx;
+    let userInteracted = false; // Track user interaction for AudioContext
+    let thrustSoundNode = null; // To manage the continuous thrust sound
+    let masterGain;
 
-    // --- Enhanced Drawing Functions ---
+    // --- Level Data (Now 15 Levels) ---
+    const levels = [
+        // Original 5
+        { startPos: { x: 100, y: 50 }, platform: { xRatio: 0.5, yOffset: 30, width: 120, height: 14 }, bananas: [ { xRatio: 0.2, yRatio: 0.4 }, { xRatio: 0.8, yRatio: 0.6 } ] },
+        { startPos: { x: 50, y: 50 }, platform: { xRatio: 0.7, yOffset: 30, width: 90, height: 14 }, bananas: [ { xRatio: 0.25, yRatio: 0.3 }, { xRatio: 0.5, yRatio: 0.7 }, { xRatio: 0.85, yRatio: 0.5 } ] },
+        { startPos: { x: 700, y: 60 }, platform: { xRatio: 0.2, yOffset: 40, width: 100, height: 16 }, bananas: [ { xRatio: 0.4, yRatio: 0.4 }, { xRatio: 0.6, yRatio: 0.8 }, { xRatio: 0.1, yRatio: 0.6 } ] },
+        { startPos: { x: 100, y: 450 }, platform: { xRatio: 0.5, yOffset: 150, width: 80, height: 14 }, bananas: [ { xRatio: 0.15, yRatio: 0.2 }, { xRatio: 0.85, yRatio: 0.2 }, { xRatio: 0.5, yRatio: 0.5 }, { xRatio: 0.5, yRatio: 0.1 } ] },
+        { startPos: { x: 400, y: 50 }, platform: { xRatio: 0.9, yOffset: 35, width: 70, height: 14 }, bananas: [ { xRatio: 0.1, yRatio: 0.8 }, { xRatio: 0.3, yRatio: 0.3 }, { xRatio: 0.6, yRatio: 0.6 }, { xRatio: 0.8, yRatio: 0.2 } ] },
+        // New Levels 6-15
+        { startPos: { x: 200, y: 100 }, platform: { xRatio: 0.1, yOffset: 60, width: 80, height: 14 }, bananas: [ { xRatio: 0.5, yRatio: 0.2 }, { xRatio: 0.8, yRatio: 0.8 } ] }, // Platform left edge
+        { startPos: { x: 600, y: 100 }, platform: { xRatio: 0.9, yOffset: 60, width: 80, height: 14 }, bananas: [ { xRatio: 0.5, yRatio: 0.2 }, { xRatio: 0.2, yRatio: 0.8 } ] }, // Platform right edge
+        { startPos: { x: 400, y: 500 }, platform: { xRatio: 0.5, yOffset: 200, width: 60, height: 12 }, bananas: [ { xRatio: 0.1, yRatio: 0.1 }, { xRatio: 0.9, yRatio: 0.1 } ] }, // High platform, small size
+        { startPos: { x: 50, y: 400 }, platform: { xRatio: 0.8, yOffset: 100, width: 100, height: 14 }, bananas: [ { xRatio: 0.1, yRatio: 0.7 }, { xRatio: 0.4, yRatio: 0.4 }, { xRatio: 0.7, yRatio: 0.1 } ] }, // Start low left, platform high right
+        { startPos: { x: 750, y: 400 }, platform: { xRatio: 0.2, yOffset: 100, width: 100, height: 14 }, bananas: [ { xRatio: 0.9, yRatio: 0.7 }, { xRatio: 0.6, yRatio: 0.4 }, { xRatio: 0.3, yRatio: 0.1 } ] }, // Start low right, platform high left
+        { startPos: { x: 400, y: 50 }, platform: { xRatio: 0.5, yOffset: 20, width: 150, height: 18 }, bananas: [ { xRatio: 0.1, yRatio: 0.5 }, { xRatio: 0.9, yRatio: 0.5 }, { xRatio: 0.5, yRatio: 0.8 } ] }, // Wide platform, low down
+        { startPos: { x: 100, y: 100 }, platform: { xRatio: 0.3, yOffset: 180, width: 70, height: 12 }, bananas: [ { xRatio: 0.6, yRatio: 0.2 }, { xRatio: 0.8, yRatio: 0.5 }, { xRatio: 0.1, yRatio: 0.9 } ] }, // High platform, tricky bananas
+        { startPos: { x: 700, y: 100 }, platform: { xRatio: 0.7, yOffset: 180, width: 70, height: 12 }, bananas: [ { xRatio: 0.4, yRatio: 0.2 }, { xRatio: 0.2, yRatio: 0.5 }, { xRatio: 0.9, yRatio: 0.9 } ] }, // Mirror of previous
+        { startPos: { x: 400, y: 300 }, platform: { xRatio: 0.05, yOffset: 50, width: 90, height: 14 }, bananas: [ { xRatio: 0.4, yRatio: 0.1 }, { xRatio: 0.7, yRatio: 0.5 }, { xRatio: 0.9, yRatio: 0.8 } ] }, // Start mid, platform far left
+        { startPos: { x: 400, y: 50 }, platform: { xRatio: 0.95, yOffset: 50, width: 90, height: 14 }, bananas: [ { xRatio: 0.1, yRatio: 0.8 }, { xRatio: 0.3, yRatio: 0.5 }, { xRatio: 0.6, yRatio: 0.1 } ] }  // Start mid, platform far right
+    ];
+
+
+    // --- Audio Functions ---
+
+    function initAudio() {
+        if (userInteracted && !audioCtx) {
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                masterGain = audioCtx.createGain();
+                masterGain.gain.setValueAtTime(0.6, audioCtx.currentTime); // Master volume
+                masterGain.connect(audioCtx.destination);
+                console.log("AudioContext Initialized");
+            } catch (e) {
+                console.error("Web Audio API is not supported in this browser", e);
+            }
+        }
+    }
+
+    function playSound(type) {
+        if (!audioCtx || !masterGain) return; // Exit if audio not ready
+
+        const now = audioCtx.currentTime;
+        let osc, gain, noiseBuffer, noiseSource;
+
+        switch (type) {
+            case 'thrust_start':
+                if (thrustSoundNode) return; // Already playing
+                osc = audioCtx.createOscillator();
+                gain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(60, now); // Low rumble
+                osc.frequency.linearRampToValueAtTime(80, now + 0.1); // Slightly increase pitch
+
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.15, now + 0.05); // Fade in quickly
+
+                osc.connect(gain).connect(masterGain);
+                osc.start(now);
+                thrustSoundNode = { osc, gain }; // Store node references
+                break;
+
+            case 'thrust_stop':
+                if (!thrustSoundNode) return; // Not playing
+                const stopTime = now + 0.1;
+                thrustSoundNode.gain.gain.linearRampToValueAtTime(0, stopTime); // Fade out
+                thrustSoundNode.osc.stop(stopTime);
+                thrustSoundNode = null;
+                break;
+
+            case 'crash':
+                 // White noise burst for explosion
+                 const bufferSize = audioCtx.sampleRate * 0.5; // 0.5 seconds of noise
+                 noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                 const output = noiseBuffer.getChannelData(0);
+                 for (let i = 0; i < bufferSize; i++) {
+                     output[i] = Math.random() * 2 - 1; // Generate white noise
+                 }
+
+                 noiseSource = audioCtx.createBufferSource();
+                 noiseSource.buffer = noiseBuffer;
+
+                 gain = audioCtx.createGain();
+                 gain.gain.setValueAtTime(0.5, now); // Start loud
+                 gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4); // Quick decay
+
+                 noiseSource.connect(gain).connect(masterGain);
+                 noiseSource.start(now);
+                 noiseSource.stop(now + 0.5);
+
+                 // Add a low thump
+                 osc = audioCtx.createOscillator();
+                 osc.type = 'triangle';
+                 osc.frequency.setValueAtTime(100, now);
+                 osc.frequency.exponentialRampToValueAtTime(30, now + 0.3);
+                 const thumpGain = audioCtx.createGain();
+                 thumpGain.gain.setValueAtTime(0.6, now);
+                 thumpGain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                 osc.connect(thumpGain).connect(masterGain);
+                 osc.start(now);
+                 osc.stop(now + 0.4);
+                 break;
+
+            case 'land':
+                osc = audioCtx.createOscillator();
+                gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.linearRampToValueAtTime(500, now + 0.1);
+                gain.gain.setValueAtTime(0.4, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.connect(gain).connect(masterGain);
+                osc.start(now);
+                osc.stop(now + 0.35);
+                // Second tone
+                 const osc2 = audioCtx.createOscillator();
+                 const gain2 = audioCtx.createGain();
+                 osc2.type = 'triangle';
+                 osc2.frequency.setValueAtTime(450, now+0.05);
+                 gain2.gain.setValueAtTime(0.3, now+0.05);
+                 gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                 osc2.connect(gain2).connect(masterGain);
+                 osc2.start(now+0.05);
+                 osc2.stop(now + 0.4);
+                break;
+
+            case 'collect':
+                osc = audioCtx.createOscillator();
+                gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(880, now); // Higher pitch (A5)
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                osc.connect(gain).connect(masterGain);
+                osc.start(now);
+                osc.stop(now + 0.25);
+                break;
+        }
+    }
+
+
+    // --- Enhanced Drawing Functions --- (Mostly unchanged from previous deluxe version)
 
     function createStars() {
         const densities = [0.0002, 0.0001, 0.00005]; // Density per pixel area
@@ -276,7 +421,6 @@
         ctx.restore();
     }
 
-
     function drawBackground() {
         // Deep Space Background Gradient
         const bgGradient = ctx.createLinearGradient(0, 0, 0, canvasHeight);
@@ -315,9 +459,11 @@
          // Foreground ground (slightly more detail)
          ctx.fillStyle = '#453540'; // Dark brownish purple
          ctx.fillRect(0, canvasHeight - 15, canvasWidth, 15);
-          for(let i=0; i< canvasWidth; i++){
-              ctx.fillStyle = Math.random() > 0.7 ? `rgba(100,80,90, ${Math.random()*0.3})` : `rgba(50,40,45, ${Math.random()*0.4})`;
-              ctx.fillRect(i, canvasHeight - 15 + Math.random()*15, 1, Math.random()*3+1); // Small vertical noise/rocks
+          for(let i=0; i< canvasWidth; i+=2){ // Optimized slightly: less rocks
+              if(Math.random() > 0.6) {
+                ctx.fillStyle = Math.random() > 0.7 ? `rgba(100,80,90, ${Math.random()*0.3})` : `rgba(50,40,45, ${Math.random()*0.4})`;
+                ctx.fillRect(i, canvasHeight - 15 + Math.random()*15, Math.random()*2+1, Math.random()*3+1); // Small vertical noise/rocks
+              }
           }
     }
 
@@ -328,9 +474,8 @@
         ctx.translate(p.x, p.y);
 
         // --- Engine Heat Distortion (Subtle) ---
-         if (thrusting && fuel > 0) {
-            const distortAmount = Math.sin(gameTime * 0.1) * 0.5 + 1; // Pulsing amount
-             // This is complex to do well in canvas, faking with wavy lines below
+         if (p.thrustingActive && fuel > 0) { // Use p.thrustingActive now
+            const distortAmount = Math.sin(gameTime * 0.1) * 0.5 + 1;
              ctx.strokeStyle = `rgba(180, 200, 255, ${0.1 + Math.random()*0.1})`;
              ctx.lineWidth = 1;
              for(let i=0; i< 3; i++) {
@@ -341,14 +486,13 @@
              }
         }
 
-
         // --- Thruster Flame ---
-        if (thrusting && fuel > 0) {
+        if (p.thrustingActive && fuel > 0) { // Use p.thrustingActive now
             const flameBaseWidth = bodyW / 3;
-            const flameHeight = bodyH * 0.6 + Math.random() * bodyH * 0.4; // More variable height
+            const flameHeight = bodyH * 0.6 + Math.random() * bodyH * 0.4;
             const coreHeight = flameHeight * 0.7;
 
-            // Outer Glow (Wider, Blueish)
+            // Outer Glow
             const glowRadius = flameHeight * 1.2;
             const glowGradient = ctx.createRadialGradient(0, bodyH/2 + coreHeight*0.5, 2, 0, bodyH/2 + coreHeight*0.6, glowRadius);
             glowGradient.addColorStop(0, `rgba(180, 220, 255, 0.6)`);
@@ -357,19 +501,18 @@
             ctx.fillStyle = glowGradient;
             ctx.fillRect(-glowRadius*0.8, bodyH/2, glowRadius*1.6, glowRadius*1.1);
 
-            // Inner Flame Core (Intense Orange/White)
+            // Inner Flame Core
             const flameGradient = ctx.createLinearGradient(0, bodyH/2, 0, bodyH/2 + coreHeight);
-            flameGradient.addColorStop(0, 'rgba(255, 255, 255, 1)'); // White hot center
+            flameGradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
             flameGradient.addColorStop(0.2, 'rgba(255, 255, 200, 1)');
-            flameGradient.addColorStop(0.6, 'rgba(255, 180, 0, 0.9)'); // Orange
-            flameGradient.addColorStop(1, 'rgba(255, 100, 0, 0.3)'); // Fainter tip
+            flameGradient.addColorStop(0.6, 'rgba(255, 180, 0, 0.9)');
+            flameGradient.addColorStop(1, 'rgba(255, 100, 0, 0.3)');
             ctx.fillStyle = flameGradient;
             ctx.beginPath();
             ctx.moveTo(-flameBaseWidth / 2, bodyH / 2);
-            // Jagged flame edges
             ctx.lineTo(flameBaseWidth * 0.1, bodyH / 2 + coreHeight * 0.3 + Math.random() * 5);
             ctx.lineTo(-flameBaseWidth * 0.2, bodyH / 2 + coreHeight * 0.6 + Math.random() * 5);
-            ctx.lineTo(0, bodyH / 2 + coreHeight); // Pointy tip
+            ctx.lineTo(0, bodyH / 2 + coreHeight);
             ctx.lineTo(flameBaseWidth * 0.2, bodyH / 2 + coreHeight * 0.6 + Math.random() * 5);
             ctx.lineTo(-flameBaseWidth * 0.1, bodyH / 2 + coreHeight * 0.3 + Math.random() * 5);
             ctx.lineTo(flameBaseWidth / 2, bodyH / 2);
@@ -377,13 +520,13 @@
             ctx.fill();
 
              // Thrust particles
-             if (Math.random() < 0.5) { // Emit particles sometimes
+             if (Math.random() < 0.5) {
                 createParticle(p.x, p.y + bodyH/2, 'thrust');
             }
         }
 
         // --- Landing Gear ---
-        ctx.strokeStyle = '#90a0b0'; // Lighter metallic grey
+        ctx.strokeStyle = '#90a0b0';
         ctx.lineWidth = 4;
         const legAngle = Math.PI / 5;
         const legLength = bodyH * 0.6;
@@ -399,44 +542,39 @@
 
         // --- Main Body ---
         const bodyGradient = ctx.createLinearGradient(0, -bodyH/2, 0, bodyH/2);
-        bodyGradient.addColorStop(0, '#d0d8e0'); // Lighter top
-        bodyGradient.addColorStop(0.5, '#a0a8b0'); // Mid tone
-        bodyGradient.addColorStop(1, '#707880'); // Darker bottom
+        bodyGradient.addColorStop(0, '#d0d8e0');
+        bodyGradient.addColorStop(0.5, '#a0a8b0');
+        bodyGradient.addColorStop(1, '#707880');
         ctx.fillStyle = bodyGradient;
         ctx.beginPath();
-        ctx.ellipse(0, 0, bodyW / 2, bodyH / 2.2, 0, 0, Math.PI * 2); // Main shape
+        ctx.ellipse(0, 0, bodyW / 2, bodyH / 2.2, 0, 0, Math.PI * 2);
         ctx.fill();
-        ctx.strokeStyle = '#505860';
-        ctx.lineWidth = 1;
-        ctx.stroke(); // Subtle outline
+        ctx.strokeStyle = '#505860'; ctx.lineWidth = 1; ctx.stroke();
 
         // --- Running Lights ---
-        const lightState = Math.floor(gameTime * 0.003) % 2; // Blink state
-        ctx.fillStyle = lightState ? '#ff6060' : '#803030'; // Blinking Red Light
+        const lightState = Math.floor(gameTime * 0.003) % 2;
+        ctx.fillStyle = lightState ? '#ff6060' : '#803030';
         ctx.beginPath(); ctx.arc(-bodyW * 0.4, 0, 3, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = !lightState ? '#60ff60' : '#308030'; // Blinking Green Light (opposite)
+        ctx.fillStyle = !lightState ? '#60ff60' : '#308030';
         ctx.beginPath(); ctx.arc(bodyW * 0.4, 0, 3, 0, Math.PI*2); ctx.fill();
-
 
         // --- Cockpit ---
         const cockpitRadius = bodyW / 2.8;
         const cockpitY = -bodyH / 8;
         const cockpitGradient = ctx.createRadialGradient(cockpitRadius * 0.2, cockpitY - cockpitRadius * 0.3, cockpitRadius * 0.1, 0, cockpitY, cockpitRadius);
-        cockpitGradient.addColorStop(0, 'rgba(180, 220, 255, 0.9)'); // Bright blueish highlight
-        cockpitGradient.addColorStop(0.7, 'rgba(80, 150, 200, 0.8)'); // Main blue tint
-        cockpitGradient.addColorStop(1, 'rgba(40, 80, 120, 0.8)'); // Darker edge
+        cockpitGradient.addColorStop(0, 'rgba(180, 220, 255, 0.9)');
+        cockpitGradient.addColorStop(0.7, 'rgba(80, 150, 200, 0.8)');
+        cockpitGradient.addColorStop(1, 'rgba(40, 80, 120, 0.8)');
         ctx.fillStyle = cockpitGradient;
         ctx.beginPath(); ctx.arc(0, cockpitY, cockpitRadius, 0, Math.PI * 2); ctx.fill();
-        // Cockpit frame
         ctx.strokeStyle = '#708090'; ctx.lineWidth = 2.5; ctx.stroke();
 
-        // --- Monkey (Simple silhouette against bright cockpit) ---
-        ctx.fillStyle = '#40281a'; // Dark brown silhouette
+        // --- Monkey ---
+        ctx.fillStyle = '#40281a';
         ctx.beginPath();
         ctx.arc(0, cockpitY + cockpitRadius*0.1, cockpitRadius*0.5, 0, Math.PI*2); // Head
-        // Tiny ears
-        ctx.arc(-cockpitRadius*0.4, cockpitY - cockpitRadius*0.3, cockpitRadius*0.2, 0, Math.PI*2);
-        ctx.arc( cockpitRadius*0.4, cockpitY - cockpitRadius*0.3, cockpitRadius*0.2, 0, Math.PI*2);
+        ctx.arc(-cockpitRadius*0.4, cockpitY - cockpitRadius*0.3, cockpitRadius*0.2, 0, Math.PI*2); // Ear L
+        ctx.arc( cockpitRadius*0.4, cockpitY - cockpitRadius*0.3, cockpitRadius*0.2, 0, Math.PI*2); // Ear R
         ctx.fill();
 
         ctx.restore();
@@ -446,22 +584,21 @@
         const platH = pf.height;
         // Base Gradient
         const baseGradient = ctx.createLinearGradient(pf.x, pf.y, pf.x, pf.y + platH);
-        baseGradient.addColorStop(0, '#607080'); // Darker grey-blue top
-        baseGradient.addColorStop(1, '#304050'); // Dark blue bottom
+        baseGradient.addColorStop(0, '#607080');
+        baseGradient.addColorStop(1, '#304050');
         ctx.fillStyle = baseGradient;
         ctx.fillRect(pf.x, pf.y, pf.width, platH);
 
-        // Top Surface Detail (grid lines)
+        // Top Surface Detail
         ctx.strokeStyle = 'rgba(150, 180, 200, 0.2)';
         ctx.lineWidth = 1;
         for(let i = 1; i < 5; i++) {
-            ctx.beginPath(); ctx.moveTo(pf.x + i*pf.width/5, pf.y); ctx.lineTo(pf.x + i*pf.width/5, pf.y + platH * 0.8); ctx.stroke(); // Vertical
+            ctx.beginPath(); ctx.moveTo(pf.x + i*pf.width/5, pf.y); ctx.lineTo(pf.x + i*pf.width/5, pf.y + platH * 0.8); ctx.stroke();
         }
-         ctx.beginPath(); ctx.moveTo(pf.x, pf.y + platH*0.3); ctx.lineTo(pf.x + pf.width, pf.y + platH*0.3); ctx.stroke(); // Horizontal
+         ctx.beginPath(); ctx.moveTo(pf.x, pf.y + platH*0.3); ctx.lineTo(pf.x + pf.width, pf.y + platH*0.3); ctx.stroke();
          ctx.beginPath(); ctx.moveTo(pf.x, pf.y + platH*0.6); ctx.lineTo(pf.x + pf.width, pf.y + platH*0.6); ctx.stroke();
 
-
-        // Landing Lights (Blinking)
+        // Landing Lights
         const lightSize = platH * 0.3;
         const lightY = pf.y + platH / 2 - lightSize / 2;
         const blinkState = Math.floor(gameTime * 0.002) % 2;
@@ -470,7 +607,6 @@
             lightGradient.addColorStop(0, '#ffffff');
             lightGradient.addColorStop(0.5, '#a0d0ff');
             lightGradient.addColorStop(1, 'rgba(100, 180, 255, 0.3)');
-
             ctx.fillStyle = lightGradient;
             // Left Light
             ctx.save(); ctx.translate(pf.x + platH*0.5, lightY + lightSize/2);
@@ -482,7 +618,7 @@
 
         // Edge Highlight
         ctx.fillStyle = 'rgba(180, 210, 240, 0.6)';
-        ctx.fillRect(pf.x, pf.y, pf.width, 1.5); // Top edge
+        ctx.fillRect(pf.x, pf.y, pf.width, 1.5);
 
         // Outline
         ctx.strokeStyle = '#102030';
@@ -490,100 +626,84 @@
         ctx.strokeRect(pf.x, pf.y, pf.width, pf.height);
     }
 
-    function drawBanana(b) { // Added subtle shading
+    function drawBanana(b) { // Unchanged
         if (b.collected) return;
         const bananaW = b.width;
         const bananaH = b.height;
         ctx.save();
         ctx.translate(b.x, b.y);
         ctx.rotate(Math.PI / 8);
-
-        // Main Body Gradient
         const bodyGradient = ctx.createLinearGradient(0, -bananaH/2, 0, bananaH/2);
-        bodyGradient.addColorStop(0, '#f8f060'); // Brighter top
-        bodyGradient.addColorStop(1, '#e0d040'); // Darker bottom
+        bodyGradient.addColorStop(0, '#f8f060'); bodyGradient.addColorStop(1, '#e0d040');
         ctx.fillStyle = bodyGradient;
         ctx.beginPath();
         ctx.moveTo(-bananaW / 2, 0);
-        ctx.bezierCurveTo(-bananaW/2.5, -bananaH/1.5, bananaW/2.5, -bananaH/1.5, bananaW / 2, 0); // Top curve
-        ctx.bezierCurveTo(bananaW/2.5, bananaH/1.5, -bananaW/2.5, bananaH/1.5, -bananaW / 2, 0); // Bottom curve
+        ctx.bezierCurveTo(-bananaW/2.5, -bananaH/1.5, bananaW/2.5, -bananaH/1.5, bananaW / 2, 0);
+        ctx.bezierCurveTo(bananaW/2.5, bananaH/1.5, -bananaW/2.5, bananaH/1.5, -bananaW / 2, 0);
         ctx.fill();
-
-        // Highlight
         ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-        ctx.beginPath();
-        ctx.ellipse(0, -bananaH*0.2, bananaW*0.3, bananaH*0.1, 0, 0, Math.PI*2);
-        ctx.fill();
-
-        // Brown Bits
+        ctx.beginPath(); ctx.ellipse(0, -bananaH*0.2, bananaW*0.3, bananaH*0.1, 0, 0, Math.PI*2); ctx.fill();
         ctx.fillStyle = '#603818';
         ctx.fillRect(-bananaW / 2 - 1.5, -2, 3, 4);
         ctx.fillRect(bananaW / 2 - 1.5, -2, 3, 4);
-
         ctx.restore();
     }
 
-    function drawHUD() { // Cleaner HUD
-        // Bar Background
+    function drawHUD() { // Unchanged
         ctx.fillStyle = 'rgba(15, 25, 45, 0.8)';
         ctx.fillRect(0, 0, canvasWidth, 45);
-        // Top Highlight Line
         ctx.fillStyle = 'rgba(100, 150, 200, 0.5)';
         ctx.fillRect(0, 0, canvasWidth, 2);
 
-        // Text Style
-        ctx.fillStyle = '#c0d8ff'; // Lighter blue text
+        ctx.fillStyle = '#c0d8ff';
         ctx.font = 'bold 16px Orbitron, sans-serif';
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
         ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
         ctx.shadowBlur = 3;
 
-        // Score
         ctx.fillText(`SCORE: ${score}`, 15, 23);
 
-        // Level & Lives (Center)
         ctx.textAlign = 'center';
-        ctx.fillText(`LVL: ${currentLevelIndex + 1}/${TOTAL_LEVELS}   LIVES: ${'♥'.repeat(lives)}${'♡'.repeat(STARTING_LIVES-lives)}`, canvasWidth / 2, 23); // Using heart symbols
+        const cw_half = canvasWidth / 2; // Cache width/2
+        ctx.fillText(`LVL: ${currentLevelIndex + 1}/${TOTAL_LEVELS}   LIVES: ${'♥'.repeat(lives)}${'♡'.repeat(STARTING_LIVES-lives)}`, cw_half, 23);
 
-        // Fuel Gauge (Right)
         ctx.textAlign = 'right';
         ctx.fillText('FUEL:', canvasWidth - 145, 23);
         const fuelGaugeWidth = 110; const fuelGaugeHeight = 14;
         const fuelX = canvasWidth - 130; const fuelY = 16;
-        // Background
         ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(fuelX, fuelY, fuelGaugeWidth, fuelGaugeHeight);
-        // Fuel Fill
         const fuelFill = Math.max(0, fuel * (fuelGaugeWidth / MAX_FUEL));
         const fuelGradient = ctx.createLinearGradient(fuelX, 0, fuelX + fuelGaugeWidth, 0);
         fuelGradient.addColorStop(0, '#ff5050'); fuelGradient.addColorStop(0.4, '#f0d040'); fuelGradient.addColorStop(1, '#50ff50');
-        ctx.fillStyle = fuelGradient; ctx.fillRect(fuelX, fuelY, fuelFill, fuelGaugeHeight); // Fill from left
-        // Border
+        ctx.fillStyle = fuelGradient; ctx.fillRect(fuelX, fuelY, fuelFill, fuelGaugeHeight);
         ctx.strokeStyle = 'rgba(150, 180, 200, 0.7)'; ctx.lineWidth = 1; ctx.strokeRect(fuelX, fuelY, fuelGaugeWidth, fuelGaugeHeight);
 
-        ctx.shadowBlur = 0; // Reset shadow
+        ctx.shadowBlur = 0;
     }
 
-     function createParticle(x, y, type) { // Refined particles
+     function createParticle(x, y, type) { // Added MAX_PARTICLES check
+        if (particles.length >= MAX_PARTICLES) return; // Optimization
+
         const lifeBase = type === 'explosion' ? 70 : (type === 'thrust' ? 15 : 25);
         const lifeVar = type === 'explosion' ? 40 : (type === 'thrust' ? 10 : 15);
         const life = Math.random() * lifeVar + lifeBase;
         const speedBase = type === 'explosion' ? 7 : (type === 'thrust' ? 3 : 1.5);
         const speedVar = type === 'explosion' ? 5 : (type === 'thrust' ? 2 : 1);
         const speed = Math.random() * speedVar + (speedBase - speedVar/2);
-        const angle = type === 'thrust' ? (Math.PI * 0.4 + Math.random() * Math.PI * 0.2) : (Math.random() * Math.PI * 2); // Thrust points down
+        const angle = type === 'thrust' ? (Math.PI * 0.4 + Math.random() * Math.PI * 0.2) : (Math.random() * Math.PI * 2);
         const gravityFactor = type === 'thrust' ? 0.1 : (type === 'dust' ? 0.8 : 0.4);
 
         const particle = {
             x: x + (Math.random() - 0.5) * (type === 'thrust' ? 5 : 10),
             y: y + (Math.random() - 0.5) * 5,
-            vx: Math.cos(angle) * speed * (type === 'thrust' ? 0.3 : 1) + (type === 'thrust' ? player.vx * 0.2 : 0), // Inherit some player vel for thrust
+            vx: Math.cos(angle) * speed * (type === 'thrust' ? 0.3 : 1) + (type === 'thrust' ? player.vx * 0.2 : 0),
             vy: Math.sin(angle) * speed + (type === 'thrust' ? player.vy * 0.2 : 0),
             life: life, maxLife: life, type: type,
             size: type === 'explosion' ? Math.random() * 7 + 3 : (type === 'thrust' ? Math.random()*2+1 : Math.random() * 3 + 2),
             color: type === 'explosion' ? (Math.random()>0.3 ? `255, ${Math.floor(Math.random()*120+100)}, 0,` : `220, 0, 0,`)
-                 : type === 'thrust' ? (Math.random()>0.5 ? `255, 255, 200,` : `255, 180, 50,`) // White/Yellow sparks
-                 : type === 'collect' ? `200, 255, 100,` // Greenish yellow for collect
+                 : type === 'thrust' ? (Math.random()>0.5 ? `255, 255, 200,` : `255, 180, 50,`)
+                 : type === 'collect' ? `200, 255, 100,`
                  : `160, 140, 120,`, // Dust color
             gravityFactor: gravityFactor,
             rotation: Math.random() * Math.PI * 2,
@@ -592,128 +712,374 @@
         particles.push(particle);
     }
 
-    function updateParticles() { // Update with gravity factor
+    function updateParticles() { // Unchanged
         for (let i = particles.length - 1; i >= 0; i--) {
             const p = particles[i];
             p.x += p.vx; p.y += p.vy;
-            p.vy += GRAVITY * p.gravityFactor; // Apply varying gravity
-            p.vx *= 0.97; p.vy *= 0.97; // Air resistance
+            p.vy += GRAVITY * p.gravityFactor;
+            p.vx *= 0.97; p.vy *= 0.97;
             p.life--; p.rotation += p.spin;
             if (p.life <= 0) particles.splice(i, 1);
         }
     }
 
-    function drawParticles() { // Draw slightly fancier particles
+    function drawParticles() { // Unchanged
         particles.forEach(p => {
             const alpha = Math.max(0, p.life / p.maxLife).toFixed(2);
             ctx.save();
             ctx.translate(p.x, p.y);
             ctx.rotate(p.rotation);
             ctx.fillStyle = `rgba(${p.color}${alpha})`;
-            if (p.type === 'explosion' || p.type === 'thrust') { // Sparks are squares
+            if (p.type === 'explosion' || p.type === 'thrust') {
                  ctx.shadowColor = `rgba(${p.color}0.7)`;
                  ctx.shadowBlur = p.size * 0.8;
                  ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
                  ctx.shadowBlur = 0;
-            } else { // Dust/Collect are circles
+            } else {
                  ctx.beginPath(); ctx.arc(0, 0, p.size/2, 0, Math.PI*2); ctx.fill();
             }
             ctx.restore();
         });
     }
 
-    // --- Game Logic --- (Mostly same, adjusted landing/crash)
-    function resetPlayer(startPosInput) { /* ... (Same clamping logic) ... */ const P_WIDTH=38, P_HEIGHT=32; let startX=startPosInput.x, startY=startPosInput.y; if(startX<P_WIDTH/2)startX=P_WIDTH/2; if(startX>canvasWidth-P_WIDTH/2)startX=canvasWidth-P_WIDTH/2; if(startY<P_HEIGHT/2)startY=P_HEIGHT/2; if(startY>canvasHeight-P_HEIGHT/2)startY=canvasHeight-P_HEIGHT/2; player={ x:startX, y:startY, vx:0, vy:0, width:P_WIDTH, height:P_HEIGHT, landed:false, crashed:false }; fuel=MAX_FUEL; thrusting=false; particles=[]; screenShake.duration = 0; }
-    function loadLevel(levelIdx) { /* ... (Same level loading, clamping) ... */ if(levelIdx>=TOTAL_LEVELS){gameState='gameWon'; showMessage(`MISSION ACCOMPLISHED!\nFinal Score: ${score}`,setupMenu); return;} currentLevelIndex=levelIdx; const ld=levels[currentLevelIndex]; platform={ width:ld.platform.width, height:ld.platform.height, x:ld.platform.xRatio*canvasWidth-ld.platform.width/2, y:canvasHeight-ld.platform.yOffset-ld.platform.height }; if(platform.x<0)platform.x=0; if(platform.x+platform.width>canvasWidth)platform.x=canvasWidth-platform.width; bananas=ld.bananas.map(b=>({ x:b.xRatio*canvasWidth, y:b.yRatio*canvasHeight, width:20, height:20, collected:false })); bananas.forEach(b=>{ b.x=Math.max(b.width/2,Math.min(canvasWidth-b.width/2,b.x)); b.y=Math.max(b.height/2,Math.min(canvasHeight-b.height/2-20,b.y)); }); resetPlayer(ld.startPos); gameState='playing'; hideMessage(); }
-    function updatePlayer() { /* ... (Same physics update) ... */ if(player.landed||player.crashed)return; player.vy+=GRAVITY; thrusting=false; if(input.up&&fuel>0){player.vy-=THRUST_POWER; fuel-=FUEL_CONSUMPTION; thrusting=true;} if(input.left&&fuel>0){player.vx-=LATERAL_THRUST; fuel-=FUEL_CONSUMPTION/3;} if(input.right&&fuel>0){player.vx+=LATERAL_THRUST; fuel-=FUEL_CONSUMPTION/3;} fuel=Math.max(0,fuel); player.vx*=FRICTION; player.vy*=FRICTION; player.x+=player.vx; player.y+=player.vy; checkCollisions(); }
-    function checkCollisions() { /* ... (Mostly same collision logic, adjusted effects) ... */ let bounced=false; const P_W=player.width, P_H=player.height; if(player.x-P_W/2<0){player.vx*=-.3; player.x=P_W/2; bounced=true;} else if(player.x+P_W/2>canvasWidth){player.vx*=-.3; player.x=canvasWidth-P_W/2; bounced=true;} if(player.y-P_H/2.5<0){player.vy*=-.3; player.y=P_H/2.5; bounced=true;} if(bounced)handleCrashMaybe(Math.max(Math.abs(player.vx),Math.abs(player.vy))); const feetXL=player.x-P_W/1.8, feetXR=player.x+P_W/1.8, feetY=player.y+P_H/2+6, pBot=player.y+P_H/2; const onPX=(feetXL>platform.x&&feetXL<platform.x+platform.width)||(feetXR>platform.x&&feetXR<platform.x+platform.width); if(onPX&&feetY>=platform.y&&pBot<platform.y+15){ /* Increased tolerance slightly */ if(Math.abs(player.vy)<=MAX_LANDING_SPEED_Y&&Math.abs(player.vx)<=MAX_LANDING_SPEED_X){ if(!player.landed){ player.landed=true; player.vy=0; player.vx=0; player.y=platform.y-P_H/2-6; gameState='landed'; score+=LANDING_BONUS; score+=Math.floor(fuel*FUEL_BONUS_MULTIPLIER); for(let i=0;i<15;i++)createParticle(player.x+(Math.random()-.5)*P_W*0.8,feetY,'dust'); const nextL=currentLevelIndex+1; if(nextL<TOTAL_LEVELS){showMessage(`Level ${currentLevelIndex+1} Complete!\nScore: ${score}`,()=>loadLevel(nextL));} else {gameState='gameWon'; showMessage(`MISSION ACCOMPLISHED!\nFinal Score: ${score}`,setupMenu);} } } else { handleCrashMaybe(Math.max(Math.abs(player.vy),Math.abs(player.vx))); } } else if(feetY>=canvasHeight){ handleCrashMaybe(player.vy); } bananas.forEach(banana=>{ if(!banana.collected){ const dx=player.x-banana.x, dy=player.y-banana.y, dist=Math.sqrt(dx*dx+dy*dy); if(dist<P_W/1.8+banana.width/2){ /* Adjusted collision radius */ banana.collected=true; score+=BANANA_POINTS; for(let i=0;i<8;i++)createParticle(banana.x,banana.y,'collect'); } } }); }
-    function handleCrashMaybe(impactSpeed) { // Added screen shake
-        const feetY = player.y+player.height/2+6;
-        if (!player.crashed && !player.landed && Math.abs(impactSpeed) > 0.15) { // Slightly higher threshold for crash
-            player.crashed = true; gameState = 'crashed'; lives--; thrusting = false;
-            triggerScreenShake(8, 30); // Intensity 8, duration 30 frames
-            for(let i=0;i<40;i++)createParticle(player.x, player.y, 'explosion'); // More explosion particles
+    // --- Game Logic ---
+    function resetPlayer(startPosInput) {
+        stopThrustSound(); // Ensure thrust sound stops on reset
+        const P_WIDTH=38, P_HEIGHT=32;
+        let startX=startPosInput.x, startY=startPosInput.y;
+        startX = Math.max(P_WIDTH/2, Math.min(canvasWidth - P_WIDTH/2, startX));
+        startY = Math.max(P_HEIGHT/2, Math.min(canvasHeight - P_HEIGHT/2, startY));
+        player={
+            x:startX, y:startY, vx:0, vy:0,
+            width:P_WIDTH, height:P_HEIGHT,
+            landed:false, crashed:false,
+            thrustingActive: false // For drawing flame/effects accurately
+        };
+        fuel=MAX_FUEL;
+        thrusting=false; // Input state
+        wasThrusting = false;
+        particles=[];
+        screenShake.duration = 0;
+    }
+
+    function loadLevel(levelIdx) {
+        stopThrustSound(); // Ensure sound stops when loading
+        if(levelIdx >= TOTAL_LEVELS){
+            gameState='gameWon';
+            showMessage(`MISSION ACCOMPLISHED!\nFinal Score: ${score}`, setupMenu);
+            return;
+        }
+        currentLevelIndex=levelIdx;
+        const ld=levels[currentLevelIndex];
+
+        // Clamp platform position based on actual canvas size
+        let platX = ld.platform.xRatio * canvasWidth - ld.platform.width / 2;
+        platX = Math.max(0, Math.min(canvasWidth - ld.platform.width, platX));
+        platform={
+            width:ld.platform.width, height:ld.platform.height,
+            x: platX,
+            y: canvasHeight - ld.platform.yOffset - ld.platform.height
+        };
+
+        // Clamp banana positions
+        bananas = ld.bananas.map(b => ({
+            x: Math.max(10, Math.min(canvasWidth - 10, b.xRatio * canvasWidth)),
+            y: Math.max(10, Math.min(canvasHeight - 30, b.yRatio * canvasHeight)), // Keep away from bottom edge slightly
+            width: 20, height: 20, collected: false
+        }));
+
+        resetPlayer(ld.startPos);
+        gameState='playing';
+        hideMessage();
+    }
+
+    function updatePlayer() {
+        if (player.landed || player.crashed) {
+            stopThrustSound(); // Stop sound if landed/crashed
+            player.thrustingActive = false;
+            return;
+        }
+
+        player.vy += GRAVITY;
+
+        // Determine if thrust is active THIS FRAME
+        player.thrustingActive = input.up && fuel > 0;
+
+        if (player.thrustingActive) {
+            player.vy -= THRUST_POWER;
+            fuel -= FUEL_CONSUMPTION;
+            startThrustSound();
+        } else {
+            stopThrustSound();
+        }
+
+        if (input.left && fuel > 0) {
+            player.vx -= LATERAL_THRUST;
+            fuel -= FUEL_CONSUMPTION / 3;
+            // Optionally add lateral thrust sound effect here if desired
+        }
+        if (input.right && fuel > 0) {
+            player.vx += LATERAL_THRUST;
+            fuel -= FUEL_CONSUMPTION / 3;
+            // Optionally add lateral thrust sound effect here if desired
+        }
+
+        fuel = Math.max(0, fuel);
+        player.vx *= FRICTION;
+        player.vy *= FRICTION;
+        player.x += player.vx;
+        player.y += player.vy;
+
+        checkCollisions();
+        wasThrusting = player.thrustingActive; // Update previous state for sound management
+    }
+
+    function startThrustSound() {
+        if (!wasThrusting) {
+            playSound('thrust_start');
+        }
+    }
+
+    function stopThrustSound() {
+        if (wasThrusting || thrustSoundNode) { // Stop if it was thrusting OR if node exists (covers edge cases)
+             playSound('thrust_stop');
+        }
+        wasThrusting = false; // Ensure this is reset
+    }
+
+    function checkCollisions() {
+        let bounced=false;
+        const P_W=player.width, P_H=player.height;
+
+        // Wall/Ceiling collisions
+        if(player.x-P_W/2<0){player.vx*=-.3; player.x=P_W/2; bounced=true;}
+        else if(player.x+P_W/2>canvasWidth){player.vx*=-.3; player.x=canvasWidth-P_W/2; bounced=true;}
+        if(player.y-P_H/2.5<0){player.vy*=-.3; player.y=P_H/2.5; bounced=true;}
+
+        if(bounced) handleCrashMaybe(Math.max(Math.abs(player.vx),Math.abs(player.vy)), false); // Check for crash on bounce
+
+        // Landing pad collision detection
+        const feetXL=player.x-P_W/1.8, feetXR=player.x+P_W/1.8; // Slightly wider stance for collision
+        const feetY=player.y+P_H/2+6; // Bottom of feet
+        const pBot=player.y+P_H/2; // Bottom of hull (approx)
+
+        const onPadX = (feetXL >= platform.x && feetXL <= platform.x + platform.width) ||
+                     (feetXR >= platform.x && feetXR <= platform.x + platform.width) ||
+                     (player.x > platform.x && player.x < platform.x + platform.width); // Check feet and center
+        const onPadY = feetY >= platform.y && pBot < platform.y + 15; // Check vertical overlap
+
+        if(onPadX && onPadY) {
+            if(Math.abs(player.vy) <= MAX_LANDING_SPEED_Y && Math.abs(player.vx) <= MAX_LANDING_SPEED_X) {
+                // Successful Landing
+                if (!player.landed) {
+                    player.landed=true; player.vy=0; player.vx=0;
+                    player.y = platform.y - P_H/2 - 6; // Adjust final position precisely
+                    gameState='landed';
+                    score+=LANDING_BONUS;
+                    score+=Math.floor(fuel*FUEL_BONUS_MULTIPLIER);
+                    for(let i=0;i<15;i++)createParticle(player.x+(Math.random()-.5)*P_W*0.8,feetY,'dust');
+                    playSound('land');
+                    stopThrustSound();
+
+                    const nextL=currentLevelIndex+1;
+                    if(nextL < TOTAL_LEVELS){
+                        showMessage(`Level ${currentLevelIndex+1} Complete!\nScore: ${score}`, ()=>loadLevel(nextL));
+                    } else {
+                        gameState='gameWon';
+                        showMessage(`MISSION ACCOMPLISHED!\nFinal Score: ${score}`, setupMenu);
+                    }
+                }
+            } else {
+                // Crash on landing pad
+                handleCrashMaybe(Math.max(Math.abs(player.vy), Math.abs(player.vx)), true);
+            }
+        } else if(feetY >= canvasHeight) {
+            // Hit the ground
+            handleCrashMaybe(player.vy, true);
+        }
+
+        // Banana collisions
+        bananas.forEach(banana => {
+            if(!banana.collected){
+                const dx=player.x-banana.x, dy=player.y-banana.y, dist=Math.sqrt(dx*dx+dy*dy);
+                if(dist < P_W/1.8 + banana.width/2){ // Slightly more generous collision
+                    banana.collected=true;
+                    score+=BANANA_POINTS;
+                    playSound('collect');
+                    for(let i=0;i<8;i++)createParticle(banana.x,banana.y,'collect');
+                }
+            }
+        });
+    }
+
+    function handleCrashMaybe(impactSpeed, isGroundOrPlatformHit) {
+        if (player.crashed || player.landed) return; // Don't crash twice
+
+        const crashSpeedThreshold = isGroundOrPlatformHit ? 0.15 : 0.5; // Require higher speed for wall crash
+        const feetY = player.y + player.height / 2 + 6;
+
+        if (Math.abs(impactSpeed) > crashSpeedThreshold) {
+            player.crashed = true; gameState = 'crashed'; lives--;
+            stopThrustSound(); // Ensure sound stops
+            playSound('crash'); // Play crash sound
+            triggerScreenShake(8, 30);
+            for(let i=0;i<40;i++)createParticle(player.x, player.y, 'explosion');
 
             if (lives <= 0) {
-                gameState = 'gameOver'; setTimeout(()=>{ showMessage(`MISSION FAILED!\nFinal Score: ${score}`, setupMenu); }, 1000); // Longer delay
+                gameState = 'gameOver';
+                setTimeout(() => { showMessage(`MISSION FAILED!\nFinal Score: ${score}`, setupMenu); }, 1200); // Slightly longer delay
             } else {
-                setTimeout(()=>{ showMessage(`CRITICAL DAMAGE!\nLives Left: ${lives}`, ()=>{ const ld = levels[currentLevelIndex]; resetPlayer(ld.startPos); gameState = 'playing'; hideMessage(); }); }, 1000);
+                 // Play 'die' sound maybe? (Currently uses crash sound)
+                 setTimeout(() => { showMessage(`CRITICAL DAMAGE!\nLives Left: ${lives}`, () => { const ld = levels[currentLevelIndex]; resetPlayer(ld.startPos); gameState = 'playing'; hideMessage(); }); }, 1200);
             }
-        } else if (!player.crashed && !player.landed && feetY >= canvasHeight) { // Ground hit (dust only)
+        } else if (isGroundOrPlatformHit && feetY >= canvasHeight - 5) { // Generate dust only if hitting actual ground level
             for(let i=0; i<15; i++) createParticle(player.x + (Math.random()-0.5)*player.width, feetY, 'dust');
-             if(Math.abs(impactSpeed) > 0.5) triggerScreenShake(3, 15); // Gentle shake on hard ground hit
+            if(Math.abs(impactSpeed) > 0.5) triggerScreenShake(3, 15);
         }
     }
+
      function triggerScreenShake(intensity, duration) {
-        screenShake.intensity = intensity;
-        screenShake.duration = duration;
+        screenShake.intensity = Math.max(screenShake.intensity, intensity); // Don't override bigger shake
+        screenShake.duration = Math.max(screenShake.duration, duration);
     }
+
     function applyScreenShake() {
         if (screenShake.duration > 0) {
-            const sx = (Math.random() - 0.5) * screenShake.intensity * (screenShake.duration / 15); // Fade shake
-            const sy = (Math.random() - 0.5) * screenShake.intensity * (screenShake.duration / 15);
+            const decay = screenShake.duration / 15; // Fade shake
+            const sx = (Math.random() - 0.5) * screenShake.intensity * decay;
+            const sy = (Math.random() - 0.5) * screenShake.intensity * decay;
             ctx.translate(sx, sy);
             screenShake.duration--;
+             if(screenShake.duration <= 0) screenShake.intensity = 0;
         }
     }
-    function updateBackground() { gameTime++; /* only used for animations now */ } // simplified, parallax handled in drawStars
 
-    // --- Show/Hide Message --- (same)
+    function updateBackground() { gameTime++; } // Just increments time for animations
+
+    // --- Show/Hide Message --- (Unchanged)
     function showMessage(text, callback) { messageText.innerText=text; messageCallback=callback; messageOverlay.style.display='flex'; }
     function hideMessage() { messageOverlay.style.display='none'; }
-    messageButton.onclick = () => { hideMessage(); if(messageCallback){ messageCallback(); messageCallback=null; } };
+    messageButton.onclick = () => {
+        // Ensure audio context is active on continue press
+        if (!userInteracted) {
+            userInteracted = true;
+            initAudio();
+        }
+        hideMessage();
+        if(messageCallback){ messageCallback(); messageCallback=null; }
+    };
 
     // --- Main Draw Function ---
     function draw() {
         ctx.save(); // Save context for screen shake
         applyScreenShake(); // Apply shake translation if active
 
-        ctx.clearRect(0, 0, canvasWidth, canvasHeight); // Clear
-        drawBackground(); // Draw background first
-        drawParticles(); // Draw particles
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+        drawBackground();
+        drawParticles(); // Draw particles underneath player/platform
 
         if (gameState !== 'menu' && gameState !== 'gameOver' && gameState !== 'gameWon') {
             drawPlatform(platform);
             bananas.forEach(drawBanana);
-            if (!player.crashed || lives <= 0) { // Draw player unless mid-crash
+            // Only draw player if not crashed OR if game over (show wreckage)
+            if (!player.crashed || gameState === 'gameOver') {
                  drawPlayer(player);
             }
             drawHUD();
         } else if (gameState === 'menu') {
-             // Draw Menu Text (Improved Style)
-             ctx.fillStyle = 'rgba(0, 5, 15, 0.8)'; ctx.fillRect(0, 0, canvasWidth, canvasHeight); // Dark overlay
+             // Draw Menu Text
+             ctx.fillStyle = 'rgba(0, 5, 15, 0.8)'; ctx.fillRect(0, 0, canvasWidth, canvasHeight);
              ctx.fillStyle = '#e0f0ff'; ctx.textAlign = 'center';
+             const cw_half = canvasWidth / 2; // Cache width/2
+             const ch_half = canvasHeight / 2;
              ctx.font = 'bold 48px Orbitron, sans-serif'; ctx.shadowColor = '#80c0ff'; ctx.shadowBlur = 15;
-             ctx.fillText('PLANET LANDER', canvasWidth / 2, canvasHeight / 2 - 80);
+             ctx.fillText('PLANET LANDER', cw_half, ch_half - 80);
              ctx.font = 'bold 28px Orbitron, sans-serif'; ctx.shadowBlur = 10;
-             ctx.fillText('DELUXE', canvasWidth / 2, canvasHeight / 2 - 35);
+             ctx.fillText('DELUXE v2', cw_half, ch_half - 35);
              ctx.font = '22px Orbitron, sans-serif'; ctx.shadowBlur = 8;
-             ctx.fillText('Tap Screen or Press Enter to Start', canvasWidth / 2, canvasHeight / 2 + 40);
+             ctx.fillText('Tap Screen or Press Enter to Start', cw_half, ch_half + 40);
              ctx.font = '16px Orbitron, sans-serif'; ctx.shadowBlur = 5;
-             ctx.fillText('Use Arrow Keys or Touch Controls', canvasWidth / 2, canvasHeight / 2 + 80);
+             ctx.fillText('Use Arrow Keys or Touch Controls', cw_half, ch_half + 80);
+             ctx.fillText('(Sound Enabled)', cw_half, ch_half + 110);
              ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
         }
-        // HTML overlay handles other messages
+        // HTML overlay handles other messages (Landed, Crashed, Game Over)
 
         ctx.restore(); // Restore context after screen shake
     }
 
     // --- Game Loop ---
     function gameLoop() {
-        if (gameState === 'playing') updatePlayer();
-        updateBackground(); updateParticles(); // Update effects
-        draw(); requestAnimationFrame(gameLoop);
+        if (gameState === 'playing') {
+            updatePlayer();
+        } else {
+            // Ensure sounds stop if not playing
+            stopThrustSound();
+        }
+        updateBackground(); // Update animations regardless of state
+        updateParticles(); // Update particles regardless of state
+        draw();
+        requestAnimationFrame(gameLoop);
     }
 
-    // --- Input Handling --- (Mostly Same)
-    function handleKeyDown(e) { if(messageOverlay.style.display==='flex'){if(e.key==='Enter')messageButton.click(); return;} if(gameState==='menu'&&(e.key==='Enter'||e.key===' ')){loadLevel(0); return;} if(gameState!=='playing')return; switch(e.key){ case 'ArrowUp': case 'w': case ' ': input.up=true; break; case 'ArrowLeft': case 'a': input.left=true; break; case 'ArrowRight': case 'd': input.right=true; break; } if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault(); }
-    function handleKeyUp(e) { if(messageOverlay.style.display==='flex'||gameState!=='playing')return; switch(e.key){ case 'ArrowUp': case 'w': case ' ': input.up=false; break; case 'ArrowLeft': case 'a': input.left=false; break; case 'ArrowRight': case 'd': input.right=false; break; } }
-    function setupTouchControls() { controlsDiv.style.display='flex'; /* Use flex display */ controlsDiv.style.justifyContent = 'space-between'; /* Space out buttons */ controlsDiv.style.padding = '0 20px'; /* Padding on sides */ /* Event listeners same */ leftBtn.addEventListener('touchstart',(e)=>{if(gameState==='playing'){e.preventDefault();input.left=true;}},{passive:false}); leftBtn.addEventListener('touchend',(e)=>{if(gameState==='playing'){e.preventDefault();input.left=false;}},{passive:false}); leftBtn.addEventListener('touchcancel',(e)=>{if(gameState==='playing'){input.left=false;}},{passive:false}); rightBtn.addEventListener('touchstart',(e)=>{if(gameState==='playing'){e.preventDefault();input.right=true;}},{passive:false}); rightBtn.addEventListener('touchend',(e)=>{if(gameState==='playing'){e.preventDefault();input.right=false;}},{passive:false}); rightBtn.addEventListener('touchcancel',(e)=>{if(gameState==='playing'){input.right=false;}},{passive:false}); thrustBtn.addEventListener('touchstart',(e)=>{if(gameState==='playing'){e.preventDefault();input.up=true;}},{passive:false}); thrustBtn.addEventListener('touchend',(e)=>{if(gameState==='playing'){e.preventDefault();input.up=false;}},{passive:false}); thrustBtn.addEventListener('touchcancel',(e)=>{if(gameState==='playing'){input.up=false;}},{passive:false}); controlsDiv.addEventListener('contextmenu',(e)=>e.preventDefault()); }
+    // --- Input Handling --- (Added audio context init on interaction)
+    function handleKeyDown(e) {
+        if(messageOverlay.style.display==='flex'){if(e.key==='Enter')messageButton.click(); return;}
+        if(gameState==='menu'&&(e.key==='Enter'||e.key===' ')){
+            if (!userInteracted) { userInteracted = true; initAudio(); } // Init audio on first interaction
+            loadLevel(0); return;
+        }
+        if(gameState!=='playing')return;
+        switch(e.key){
+            case 'ArrowUp': case 'w': case ' ': input.up=true; break;
+            case 'ArrowLeft': case 'a': input.left=true; break;
+            case 'ArrowRight': case 'd': input.right=true; break;
+        }
+        if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();
+    }
+    function handleKeyUp(e) {
+        if(messageOverlay.style.display==='flex'||gameState!=='playing')return;
+        switch(e.key){
+            case 'ArrowUp': case 'w': case ' ': input.up=false; break;
+            case 'ArrowLeft': case 'a': input.left=false; break;
+            case 'ArrowRight': case 'd': input.right=false; break;
+        }
+    }
+    function setupTouchControls() {
+        controlsDiv.style.display='flex';
+        controlsDiv.style.justifyContent = 'space-between';
+        controlsDiv.style.padding = '0 20px';
+
+        const touchStartHandler = (inputType) => (e) => {
+             if(gameState==='playing'){ e.preventDefault(); input[inputType] = true; }
+             else if(gameState==='menu' || messageOverlay.style.display==='flex') {
+                 // Trigger start/continue on button press too
+                 startHandler(e);
+             }
+        };
+        const touchEndHandler = (inputType) => (e) => {
+             if(gameState==='playing'){ e.preventDefault(); input[inputType] = false; }
+        };
+
+        leftBtn.addEventListener('touchstart', touchStartHandler('left'), {passive:false});
+        leftBtn.addEventListener('touchend', touchEndHandler('left'), {passive:false});
+        leftBtn.addEventListener('touchcancel', touchEndHandler('left'), {passive:false});
+
+        rightBtn.addEventListener('touchstart', touchStartHandler('right'), {passive:false});
+        rightBtn.addEventListener('touchend', touchEndHandler('right'), {passive:false});
+        rightBtn.addEventListener('touchcancel', touchEndHandler('right'), {passive:false});
+
+        thrustBtn.addEventListener('touchstart', touchStartHandler('up'), {passive:false});
+        thrustBtn.addEventListener('touchend', touchEndHandler('up'), {passive:false});
+        thrustBtn.addEventListener('touchcancel', touchEndHandler('up'), {passive:false});
+
+        controlsDiv.addEventListener('contextmenu',(e)=>e.preventDefault());
+    }
 
     // --- Initialization ---
-    function resizeCanvas() { // Uses gameContainer for sizing now
+    function resizeCanvas() {
         const aspectRatio = 800 / 600;
-        const controlsHeight = isTouchDevice() ? 100 : 0; // Allow for controls + margin
+        const controlsHeight = isTouchDevice() ? 100 : 0;
         let availableWidth = window.innerWidth;
         let availableHeight = window.innerHeight;
 
@@ -725,42 +1091,82 @@
         } else {
              targetCanvasHeight = targetCanvasWidth / aspectRatio;
         }
-        targetCanvasWidth = Math.min(targetCanvasWidth, availableWidth - 4);
-        targetCanvasHeight = Math.min(targetCanvasHeight, availableHeight - controlsHeight - 4);
+        // Ensure reasonable minimum size and stay within bounds
+        targetCanvasWidth = Math.max(320, Math.min(targetCanvasWidth, availableWidth - 4));
+        targetCanvasHeight = Math.max(240, Math.min(targetCanvasHeight, availableHeight - controlsHeight - 4));
 
-        canvas.width = Math.max(320, targetCanvasWidth);
-        canvas.height = Math.max(240, targetCanvasHeight);
+        canvas.width = targetCanvasWidth;
+        canvas.height = targetCanvasHeight;
 
-        // Size container to fit canvas exactly, flexbox handles controls below
         gameContainer.style.width = `${canvas.width}px`;
-        gameContainer.style.height = `${canvas.height + controlsHeight}px`; // Set explicit height
-
+        gameContainer.style.height = `${canvas.height + controlsHeight}px`;
 
         canvasWidth = canvas.width; canvasHeight = canvas.height;
 
-        createStars(); // Recreate stars for new size
-        createDistantPlanet(); // Reposition planet
+        // Recreate background elements based on new size
+        createStars();
+        createDistantPlanet();
 
-         if (gameState !== 'menu') { // Reload level, clamp positions
-            const currentScore=score; const currentLives=lives;
-            const ld=levels[currentLevelIndex];
-            if(ld.startPos.x>canvasWidth-player.width/2)ld.startPos.x=canvasWidth-player.width/2; if(ld.startPos.y>canvasHeight-player.height/2)ld.startPos.y=canvasHeight-player.height/2;
-            loadLevel(currentLevelIndex);
-            score=currentScore; lives=currentLives;
-            if(gameState==='crashed'||gameState==='landed'||gameState==='gameWon'||gameState==='gameOver'){gameState='playing'; hideMessage();}
+         // If game was in progress, we need to reload the level elements
+         // to reposition them correctly according to ratios. Keep score/lives.
+         if (gameState !== 'menu') {
+            const currentScoreBackup=score;
+            const currentLivesBackup=lives;
+            const wasPlaying = (gameState === 'playing' || gameState === 'landed' || gameState === 'crashed');
+
+            loadLevel(currentLevelIndex); // Reloads level, resets player etc.
+
+            score=currentScoreBackup; // Restore score/lives
+            lives=currentLivesBackup;
+
+            // If the game was paused by a message, keep the message state
+            if (gameState === 'landed' || gameState === 'crashed' || gameState === 'gameOver' || gameState === 'gameWon') {
+                 // Message overlay will handle game continuation
+            } else if (wasPlaying) {
+                 gameState = 'playing'; // Ensure we return to playing state if we were before resize
+                 hideMessage(); // Hide any potential leftover messages from loadLevel
+            } else {
+                 setupMenu(); // Default back to menu if state was unclear
+            }
+         } else {
+             // Ensure menu redraws correctly if resized while in menu
+             draw();
          }
     }
     function isTouchDevice() { return (('ontouchstart' in window)||(navigator.maxTouchPoints > 0)||(navigator.msMaxTouchPoints > 0)); }
-    function setupMenu() { gameState='menu'; currentLevelIndex=0; score=0; lives=STARTING_LIVES; input={left:false,right:false,up:false}; hideMessage(); particles=[]; screenShake.duration=0;}
+    function setupMenu() {
+        gameState='menu';
+        currentLevelIndex=0; score=0; lives=STARTING_LIVES;
+        input={left:false,right:false,up:false};
+        hideMessage();
+        particles=[];
+        screenShake.duration=0;
+        stopThrustSound(); // Ensure sounds off in menu
+    }
+
+    const startHandler=(e)=>{
+        if (gameState === 'menu') {
+            e.preventDefault();
+            if (!userInteracted) { userInteracted = true; initAudio(); } // Init audio on first interaction
+            loadLevel(0);
+        } else if (messageOverlay.style.display === 'flex') {
+             // Clicking canvas can also dismiss message if button not hit
+             // messageButton.click(); // Let button handler manage audio context
+        }
+    };
 
     function init() {
         if (isTouchDevice()) { setupTouchControls(); }
         else { controlsDiv.style.display = 'none'; }
         window.addEventListener('keydown', handleKeyDown); window.addEventListener('keyup', handleKeyUp);
-        const startHandler=(e)=>{ if(gameState==='menu'){e.preventDefault();loadLevel(0);} else if(messageOverlay.style.display==='flex'){messageButton.click();} };
-        canvas.addEventListener('click', startHandler); canvas.addEventListener('touchend', startHandler);
+
+        // Use mousedown/touchstart for initial interaction to capture audio context unlock better
+        canvas.addEventListener('mousedown', startHandler);
+        canvas.addEventListener('touchstart', startHandler, {passive: false}); // Need passive false for preventDefault
+
         window.addEventListener('resize', resizeCanvas);
-        setupMenu(); resizeCanvas(); // Resize must be after setupMenu to init background correctly
+        setupMenu();
+        resizeCanvas(); // Resize must be after setupMenu to init background correctly
         gameLoop();
     }
     window.onload = init;
