@@ -2,449 +2,770 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- SEO Meta Tags (Keep from previous version) -->
-    <title>YouTube Tag Extractor, Stats & Description Finder | Free Tool (2024)</title>
-    <meta name="description" content="Instantly extract tags, view descriptions, stats (views, likes), duration & more from any YouTube video or Short. Free online tool for video SEO & analysis.">
-    <meta name="keywords" content="youtube tag extractor, youtube description extractor, youtube video stats, view count, like count, video duration, find youtube tags, youtube video tags, youtube seo tool, video keywords, youtube shorts tags, free youtube tool, youtube tag finder, video description viewer, competitor analysis youtube">
-    <!-- Add canonical, og, twitter tags as before, replacing placeholders -->
-    <link rel="canonical" href="YOUR_CANONICAL_URL_HERE">
-    <meta property="og:title" content="Free YouTube Tag, Stats & Description Extractor Tool">
-    <meta property="og:description" content="Extract tags, description, view count, likes, duration & more from YouTube videos/Shorts. Optimize your video SEO.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="YOUR_OG_URL_HERE">
-    <meta name="twitter:card" content="summary">
-    <!-- ... other meta tags ... -->
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Planet Lander Deluxe</title>
     <style>
-        :root {
-            --yt-red: #FF0000;
-            --yt-red-darker: #cc0000;
-            --light-grey: #f4f4f4; /* Slightly lighter grey */
-            --medium-grey: #e0e0e0;
-            --dark-grey: #606060;
-            --text-color: #333;
-            --border-color: #ddd; /* Softer border */
-            --success-bg: #d4edda;
-            --success-color: #155724;
-            --info-bg: #d1ecf1;
-            --info-color: #0c5460;
-            --info-border: #bee5eb;
-            --error-color: #dc3545;
-            --link-color: #007bff;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap'); /* Sci-fi font */
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; /* System font stack */
-            line-height: 1.6;
-            padding: 15px; /* Reduced padding for mobile */
-            background-color: var(--light-grey);
-            color: var(--text-color);
             margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #000510; /* Very dark blue */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Orbitron', 'Segoe UI', Tahoma, sans-serif; /* Use Orbitron */
+            color: #e0f0ff; /* Light blueish white */
+            touch-action: none;
         }
-
-        .container {
-            background-color: #fff;
-            padding: 20px; /* Adjusted padding */
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); /* Softer shadow */
-            max-width: 800px; /* Slightly wider max-width */
+        #gameContainer {
+             display: flex;
+             flex-direction: column;
+             align-items: center;
+             width: 100%;
+             height: 100%;
+             justify-content: center;
+        }
+        canvas {
+            display: block;
+            border: 2px solid #304050; /* Dark muted blue border */
+            max-width: 100%;
+            max-height: calc(100% - 100px); /* Adjusted for controls height */
+            background: #050810; /* Very dark fallback */
+            box-shadow: 0 0 15px rgba(150, 200, 255, 0.2); /* Subtle glow */
+            flex-shrink: 0;
+            image-rendering: pixelated; /* Optional: Crisper look for simple graphics */
+            image-rendering: crisp-edges;
+        }
+        #controls {
             width: 100%;
-            margin: 20px auto; /* Centering */
+            max-width: 800px;
+            height: 95px; /* Slightly taller */
+            display: none;
+            position: relative;
+            margin-top: 5px;
+            flex-shrink: 0;
+            padding: 5px 0;
             box-sizing: border-box;
+            /* background: rgba(0,0,0,0.1); */
         }
-
-        h1 {
-            color: var(--yt-red); text-align: center; margin-bottom: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1.6rem; /* Adjusted size */
+        #controls button {
+            position: absolute;
+            bottom: 10px; /* Lowered slightly */
+            background: linear-gradient(to bottom, #4a5568, #2d3748); /* Cool grey/blue gradient */
+            border: 2px outset #718096;
+            color: #e0f0ff; /* Light text */
+            font-size: 2.5em; /* Larger icon */
+            font-weight: bold;
+            padding: 0; /* Remove padding for centering */
+            margin: 0;
+            border-radius: 50%;
+            width: 70px;   /* Slightly smaller */
+            height: 70px;
+            user-select: none;
+            -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            text-shadow: 0 0 3px rgba(150, 200, 255, 0.7); /* Text glow */
+            line-height: 70px; /* Vertically center icon */
+            text-align: center; /* Horizontally center icon */
+            transition: background 0.1s ease, box-shadow 0.1s ease, transform 0.1s ease;
+            overflow: hidden; /* Hide potential overflow */
         }
-        h1 svg { width: 28px; height: 20px; fill: var(--yt-red); } /* Slightly smaller icon */
-        h2 { color: var(--dark-grey); font-weight: 600; margin-top: 25px; margin-bottom: 15px; border-bottom: 1px solid var(--medium-grey); padding-bottom: 8px; font-size: 1.3rem; }
-        h3 { color: var(--dark-grey); font-weight: 600; margin-top: 20px; margin-bottom: 10px; font-size: 1.15rem;}
-
-        .intro-text, .usage-guide, .benefits-section { margin-bottom: 20px; font-size: 0.95rem; /* Slightly smaller base text */ }
-        .intro-text p, .usage-guide p, .benefits-section p { margin-bottom: 8px; }
-        .usage-guide ol, .benefits-section ul { padding-left: 25px; margin-top: 5px;}
-        .usage-guide li, .benefits-section li { margin-bottom: 5px; }
-
-        .tool-section { border: 1px solid var(--border-color); padding: 20px; border-radius: 8px; margin-top: 20px; background-color: #fdfdfd; }
-        label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--dark-grey); font-size: 0.9rem; }
-        input[type="text"] { width: 100%; padding: 10px 12px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 1rem; box-sizing: border-box; transition: border-color 0.2s ease; background-color: #fff; -webkit-appearance: none; /* Prevent iOS zoom on focus */ }
-        input[type="text"]:focus { outline: none; border-color: var(--yt-red); box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.15); }
-        button#extractButton { display: block; width: 100%; padding: 12px; background-color: var(--yt-red); color: white; border: none; border-radius: 4px; font-size: 1.05rem; font-weight: 500; cursor: pointer; transition: background-color 0.2s ease; margin-top: 10px; -webkit-appearance: none; }
-        button#extractButton:hover { background-color: var(--yt-red-darker); }
-        button#extractButton:disabled { background-color: #ccc; cursor: not-allowed; opacity: 0.7; }
-
-        #results { margin-top: 25px; padding-top: 15px; border-top: 1px solid var(--light-grey); }
-        .result-section { margin-bottom: 20px; padding: 15px; border: 1px solid var(--border-color); border-radius: 6px; background-color: #fff; }
-        .result-section h3 { margin-top: 0; margin-bottom: 15px; color: var(--dark-grey); font-size: 1.2rem; border-bottom: 1px solid var(--medium-grey); padding-bottom: 8px; font-weight: 600;}
-
-        /* Video Info Section Styling */
-        .video-main-info { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
-        @media (min-width: 600px) { /* Side-by-side thumbnail and details on larger screens */
-            .video-main-info { flex-direction: row; align-items: flex-start; }
-            .video-thumbnail { flex-shrink: 0; width: 160px; } /* Fixed width for thumbnail */
-            .video-details-main { flex-grow: 1; }
-        }
-        .video-thumbnail img { display: block; width: 100%; max-width: 320px; /* Max width on mobile */ height: auto; border-radius: 4px; border: 1px solid var(--border-color); }
-        #videoTitle { font-weight: 600; font-size: 1.2rem; color: var(--text-color); margin: 0 0 10px 0; }
-        .video-channel { font-size: 0.95rem; color: var(--dark-grey); margin-bottom: 10px;}
-        .video-channel a { color: var(--link-color); text-decoration: none; }
-        .video-channel a:hover { text-decoration: underline; }
-
-        /* Stats List Styling */
-        .stats-list { list-style: none; padding: 0; margin: 0; font-size: 0.9rem; color: var(--dark-grey); }
-        .stats-list li { margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
-        .stats-list li svg { width: 16px; height: 16px; fill: currentColor; opacity: 0.8;}
-        .stats-list strong { font-weight: 500; color: var(--text-color); }
-
-        /* Description Container */
-        .description-container pre { background-color: #f9f9f9; border: 1px solid var(--medium-grey); border-radius: 4px; padding: 10px 12px; white-space: pre-wrap; word-wrap: break-word; max-height: 300px; overflow-y: auto; font-size: 0.9rem; color: var(--text-color); }
-
-        /* Tags Section */
-        .tags-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .tags-header h4 { margin: 0; color: var(--dark-grey); font-size: 1.1rem; font-weight: 600;}
-        button#copyButton { padding: 5px 10px; background-color: var(--link-color); color: white; border: none; border-radius: 4px; font-size: 0.85rem; cursor: pointer; transition: background-color 0.2s ease; -webkit-appearance: none; }
-        button#copyButton:hover { background-color: #0056b3; }
-        button#copyButton:disabled { background-color: #ccc; cursor: not-allowed; opacity: 0.7;}
-        #copyFeedback { font-size: 0.8rem; color: var(--success-color); margin-left: 8px; }
-        .tags-list { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-        .tag-item { background-color: var(--medium-grey); color: var(--text-color); padding: 4px 10px; border-radius: 15px; font-size: 0.85rem; white-space: nowrap; }
-
-        /* Other Details Section */
-        .details-list { list-style: none; padding: 0; margin: 0; font-size: 0.9rem; color: var(--dark-grey); }
-        .details-list li { margin-bottom: 6px; }
-        .details-list dt { font-weight: 500; color: var(--text-color); display: inline; }
-        .details-list dd { display: inline; margin-left: 5px; }
-
-        .monetization-info p { background-color: var(--info-bg); color: var(--info-color); border: 1px solid var(--info-border); padding: 10px 15px; border-radius: 4px; font-size: 0.9rem; margin: 0; }
-
-        #statusMessage { margin: 15px 0; padding: 10px 15px; border-radius: 4px; font-weight: 500; font-size: 0.9rem;}
-        #statusMessage.error { color: var(--error-color); background-color: #f8d7da; border: 1px solid #f5c6cb; }
-        #statusMessage.info { color: var(--dark-grey); background-color: var(--light-grey); border: 1px solid var(--medium-grey); }
-        #statusMessage.loading { color: #0c5460; background-color: #d1ecf1; border: 1px solid #bee5eb; }
-
-        footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid var(--medium-grey); font-size: 0.85rem; color: var(--dark-grey); }
-        footer p { margin: 5px 0;}
-        .api-warning { display: none; } /* Keep API key warning hidden visually */
-
-        /* Simple SVG Icons for Stats */
-        .icon-eye:before { content: "👁️"; /* Fallback emoji */ }
-        .icon-thumbs-up:before { content: "👍"; }
-        .icon-comment:before { content: "💬"; }
-        .icon-calendar:before { content: "📅"; }
-        .icon-clock:before { content: "⏰"; }
-        /* You could replace these with actual SVG <path> data for better consistency */
-
-    </style>
-
-    <!-- Schema.org Markup (Keep from previous version) -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "YouTube Tag Extractor, Stats & Description Finder",
-      "description": "A free online tool to extract video tags, descriptions, view count, likes, duration and more from YouTube videos and Shorts.",
-      "applicationCategory": "BrowserApplication",
-      "operatingSystem": "Any",
-      "url": "YOUR_APPLICATION_URL_HERE",
-      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-      "potentialAction": { "@type": "SearchAction", "target": "YOUR_APPLICATION_URL_HERE?videoUrl={video_url}", "query-input": "required name=video_url" }
-    }
-    </script>
-</head>
-<body>
-    <div class="container">
-        <h1>
-            <svg aria-label="YouTube Icon" viewBox="0 0 24 18" xmlns="http://www.w3.org/2000/svg"><path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.407-.501-9.407-.501s-7.537 0-9.407.501A3.007 3.007 0 0 0 .505 6.205a31.247 31.247 0 0 0-.505 5.59A31.247 31.247 0 0 0 .505 17.385a3.007 3.007 0 0 0 2.088 2.088c1.87.501 9.407.501 9.407.501s7.537 0 9.407-.501a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .505-5.59 31.247 31.247 0 0 0-.505-5.59zM9.609 14.81V8.19l6.156 3.31-6.156 3.31z"/></svg>
-            YouTube Video Inspector
-        </h1>
-
-        <section class="intro-text">
-             <h2>Extract YouTube Video Details Instantly</h2>
-             <p>Get valuable insights from any public YouTube video or Short. This free tool extracts **tags, description, view count, likes, duration, channel info, publish date**, and more. Simply paste the video URL below.</p>
-        </section>
-
-        <!-- Tool Section -->
-        <section class="tool-section">
-            <h2>Extractor Tool</h2>
-            <label for="videoUrl">Enter YouTube Video URL:</label>
-            <input type="text" id="videoUrl" placeholder="e.g., https://www.youtube.com/watch?v=..." autocapitalize="none" autocorrect="off">
-            <button id="extractButton">Extract Video Info</button>
-            <div id="statusMessage" style="display: none;"></div>
-        </section>
-
-        <!-- Results Area -->
-        <div id="results">
-            <!-- Dynamic content injection point -->
-        </div>
-
-        <!-- SEO Content Sections (Keep as before) -->
-         <section class="benefits-section">
-            <h2>Why Extract Video Details?</h2>
-             <ul>
-                <li><strong>Optimize Video SEO:</strong> Find relevant keywords and tags used by successful videos.</li>
-                <li><strong>Analyze Competitors:</strong> Understand the strategy behind competitor videos (tags, description length, stats).</li>
-                <li><strong>Find Content Ideas:</strong> Analyze popular video tags and descriptions.</li>
-                <li><strong>Quickly Assess Videos:</strong> Get key stats (views, likes, duration) at a glance.</li>
-                <li><strong>Save Time:</strong> Avoid manually searching for tags or video details in source code.</li>
-            </ul>
-        </section>
-        <section class="usage-guide">
-             <h2>How to Use</h2>
-             <ol>
-                 <li>Copy the URL of the YouTube video or Short.</li>
-                 <li>Paste the URL into the input box above.</li>
-                 <li>Click "Extract Video Info".</li>
-                 <li>View the detailed results, including title, stats, description, and tags.</li>
-                 <li>Use the "Copy All Tags" button if needed.</li>
-             </ol>
-         </section>
-
-        <footer>
-            <p>© 2024 Your Website Name. All rights reserved.</p>
-            <p>Uses YouTube Data API v3. Not affiliated with YouTube.</p>
-            <!-- Keep the API Key Warning here in comments for your reference! -->
-            <!-- !!! SECURITY WARNING !!! API Key is exposed client-side below. -->
-            <p class="api-warning">API Key Warning: For developer reference only, key exposed.</p>
-        </footer>
-    </div>
-
-    <script>
-        const apiKey = "AIzaSyBR5v5pn_8dmVToTXHB1ygMHu3odm6PK0I"; // <-- STILL INSECURE HERE
-        const extractButton = document.getElementById('extractButton');
-        const videoUrlInput = document.getElementById('videoUrl');
-        const resultsDiv = document.getElementById('results');
-        const statusMessageDiv = document.getElementById('statusMessage');
-
-        let currentTags = [];
-
-        // --- Helper Functions ---
-        function formatNumber(num) {
-            if (num === undefined || num === null) return 'N/A';
-            return parseInt(num).toLocaleString();
-        }
-
-        function formatIsoDuration(isoDuration) {
-            if (!isoDuration) return 'N/A';
-            const regex = /P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)W)?(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/;
-            const matches = isoDuration.match(regex);
-            if (!matches) return 'N/A';
-
-            const hours = parseInt(matches[5] || 0);
-            const minutes = parseInt(matches[6] || 0);
-            const seconds = parseInt(matches[7] || 0);
-
-            let formatted = '';
-            if (hours > 0) {
-                formatted += hours + ':';
-                formatted += minutes.toString().padStart(2, '0') + ':';
-            } else {
-                formatted += minutes + ':';
-            }
-            formatted += seconds.toString().padStart(2, '0');
-            return formatted;
-        }
-
-         function formatIsoDate(isoDate) {
-            if (!isoDate) return 'N/A';
-            try {
-                const date = new Date(isoDate);
-                return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
-            } catch (e) {
-                return 'N/A';
-            }
+         #controls button::before { /* Inner glow effect */
+            content: '';
+            position: absolute;
+            top: 2px; left: 2px; right: 2px; bottom: 2px;
+            border-radius: 50%;
+            background: radial-gradient(ellipse at center, rgba(200,220,255,0.2) 0%,rgba(0,0,0,0) 70%);
+            opacity: 0.8;
+            transition: opacity 0.1s ease;
          }
 
-        // --- Core Functions ---
-        extractButton.addEventListener('click', getVideoInfo);
-        videoUrlInput.addEventListener('keypress', (event) => { if (event.key === 'Enter') { event.preventDefault(); extractButton.click(); } });
+         #controls button:active {
+             background: linear-gradient(to top, #4a5568, #2d3748);
+             border-style: inset;
+             box-shadow: inset 0 3px 6px rgba(0,0,0,0.5);
+             transform: scale(0.95); /* Press down effect */
+         }
+          #controls button:active::before {
+              opacity: 0.4;
+          }
 
-        function displayStatus(message, type = 'info') { /* ... (keep as is) ... */
-             statusMessageDiv.textContent = message; statusMessageDiv.className = type; statusMessageDiv.style.display = 'block';
+        #leftBtn { left: 30px; } /* More spacing */
+        #thrustBtn { left: 50%; transform: translateX(-50%); }
+        #rightBtn { right: 30px; }
+
+        #messageOverlay {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(5, 8, 20, 0.85); /* Darker, less transparent */
+            display: none; flex-direction: column;
+            justify-content: center; align-items: center;
+            text-align: center; z-index: 20; color: #e0f0ff;
+            font-size: 2.2em; /* Slightly larger */
+            padding: 20px; box-sizing: border-box;
+            backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
         }
-        function hideStatus() { /* ... (keep as is) ... */
-             statusMessageDiv.style.display = 'none'; statusMessageDiv.textContent = ''; statusMessageDiv.className = '';
+         #messageText {
+             margin-bottom: 35px; line-height: 1.5;
+             text-shadow: 0 0 8px rgba(150, 200, 255, 0.8), 0 0 5px rgba(150, 200, 255, 0.6); /* Stronger glow */
+             font-weight: bold;
+         }
+        #messageOverlay button {
+             font-size: 0.8em; padding: 15px 35px; margin-top: 20px;
+             background: linear-gradient(to bottom, #306090, #183050); /* Blue gradient */
+             border: 2px outset #5080c0; color: #e0f0ff;
+             border-radius: 8px; cursor: pointer; font-weight: bold;
+             box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+             text-shadow: 0 0 3px rgba(150, 200, 255, 0.7);
+             transition: all 0.1s ease;
+             font-family: 'Orbitron', sans-serif; /* Match game font */
         }
-        function clearResults() { /* ... (keep as is) ... */
-             resultsDiv.innerHTML = ''; currentTags = []; hideStatus();
+         #messageOverlay button:active {
+            background: linear-gradient(to top, #306090, #183050);
+            border-style: inset; box-shadow: inset 0 2px 5px rgba(0,0,0,0.4);
+            transform: scale(0.96);
+         }
+    </style>
+</head>
+<body>
+
+<div id="gameContainer">
+    <canvas id="gameCanvas"></canvas>
+    <div id="controls">
+        <!-- Using arrows as text content, could be replaced with SVG/img -->
+        <button id="leftBtn">◀</button> <!-- Left arrow -->
+        <button id="thrustBtn">▲</button> <!-- Up arrow -->
+        <button id="rightBtn">▶</button> <!-- Right arrow -->
+    </div>
+</div>
+
+<div id="messageOverlay">
+    <div id="messageText">Message Here</div>
+    <button id="messageButton">CONTINUE</button>
+</div>
+
+<script>
+    // --- Core Variables --- (Most are same as previous)
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const controlsDiv = document.getElementById('controls');
+    const leftBtn = document.getElementById('leftBtn');
+    const thrustBtn = document.getElementById('thrustBtn');
+    const rightBtn = document.getElementById('rightBtn');
+    const messageOverlay = document.getElementById('messageOverlay');
+    const messageText = document.getElementById('messageText');
+    const messageButton = document.getElementById('messageButton');
+    const gameContainer = document.getElementById('gameContainer');
+
+    let canvasWidth, canvasHeight;
+    let gameState = 'menu';
+    let currentLevelIndex = 0;
+    const TOTAL_LEVELS = 5;
+    let screenShake = { intensity: 0, duration: 0 };
+
+    // --- Physics & Gameplay Constants --- (Kept low sensitivity)
+    const GRAVITY = 0.035;        // Slightly higher gravity for feel
+    const THRUST_POWER = 0.09;   // Adjusted thrust
+    const LATERAL_THRUST = 0.045; // Adjusted lateral
+    const FRICTION = 0.99;       // Slightly more friction
+    const FUEL_CONSUMPTION = 0.07; // Slightly less fuel use
+    const MAX_FUEL = 100;
+    const STARTING_LIVES = 3;
+    const MAX_LANDING_SPEED_Y = 1.2; // Stricter Y
+    const MAX_LANDING_SPEED_X = 0.9; // Stricter X
+    const BANANA_POINTS = 150;      // More points
+    const LANDING_BONUS = 750;      // Higher bonus
+    const FUEL_BONUS_MULTIPLIER = 3; // Better fuel bonus
+
+    // --- Game State ---
+    let player = {};
+    let platform = {};
+    let bananas = [];
+    let starLayers = [[], [], []]; // 3 layers for parallax
+    let distantPlanet = {};
+    let particles = [];
+    let input = { left: false, right: false, up: false };
+    let score = 0;
+    let lives = STARTING_LIVES;
+    let fuel = MAX_FUEL;
+    let thrusting = false;
+    let messageCallback = null;
+    let gameTime = 0; // For animations
+
+    // --- Level Data --- (Same as before)
+    const levels = [ { startPos: { x: 100, y: 50 }, platform: { xRatio: 0.5, yOffset: 30, width: 120, height: 14 }, bananas: [ { xRatio: 0.2, yRatio: 0.4 }, { xRatio: 0.8, yRatio: 0.6 } ] }, { startPos: { x: 50, y: 50 }, platform: { xRatio: 0.7, yOffset: 30, width: 90, height: 14 }, bananas: [ { xRatio: 0.25, yRatio: 0.3 }, { xRatio: 0.5, yRatio: 0.7 }, { xRatio: 0.85, yRatio: 0.5 } ] }, { startPos: { x: 700, y: 60 }, platform: { xRatio: 0.2, yOffset: 40, width: 100, height: 16 }, bananas: [ { xRatio: 0.4, yRatio: 0.4 }, { xRatio: 0.6, yRatio: 0.8 }, { xRatio: 0.1, yRatio: 0.6 } ] }, { startPos: { x: 100, y: 450 }, platform: { xRatio: 0.5, yOffset: 150, width: 80, height: 14 }, bananas: [ { xRatio: 0.15, yRatio: 0.2 }, { xRatio: 0.85, yRatio: 0.2 }, { xRatio: 0.5, yRatio: 0.5 }, { xRatio: 0.5, yRatio: 0.1 } ] }, { startPos: { x: 400, y: 50 }, platform: { xRatio: 0.9, yOffset: 35, width: 70, height: 14 }, bananas: [ { xRatio: 0.1, yRatio: 0.8 }, { xRatio: 0.3, yRatio: 0.3 }, { xRatio: 0.6, yRatio: 0.6 }, { xRatio: 0.8, yRatio: 0.2 } ] } ];
+
+    // --- Enhanced Drawing Functions ---
+
+    function createStars() {
+        const densities = [0.0002, 0.0001, 0.00005]; // Density per pixel area
+        const speeds = [0.05, 0.03, 0.01]; // Parallax speeds
+        starLayers = [[], [], []];
+        for (let layer = 0; layer < 3; layer++) {
+            const count = Math.floor(canvasWidth * canvasHeight * densities[layer]);
+            for (let i = 0; i < count; i++) {
+                starLayers[layer].push({
+                    x: Math.random() * canvasWidth,
+                    y: Math.random() * canvasHeight,
+                    radius: Math.random() * (1.5 - layer * 0.3) + 0.2, // Smaller stars further away
+                    alpha: Math.random() * 0.6 + 0.2,
+                    speed: speeds[layer]
+                });
+            }
         }
-        function getVideoId(url) { /* ... (keep as is) ... */
-             const patterns = [/(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/, /(?:https?:\/\/)?(?:www\.)?youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/, /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([a-zA-Z0-9_-]{11})/, /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/, /(?:https?:\/\/)?(?:m\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/, /(?:https?:\/\/)?(?:music\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/];
-             for (const pattern of patterns) { const match = url.match(pattern); if (match && match[1]) return match[1]; }
-             const looseMatch = url.match(/([a-zA-Z0-9_-]{11})/); if (looseMatch && looseMatch[1] && url.length < 30) return looseMatch[1];
-             return null;
+    }
+
+    function createDistantPlanet() {
+         distantPlanet = {
+            x: canvasWidth * (Math.random() * 0.4 + 0.3), // Position horizontally
+            y: canvasHeight * (Math.random() * 0.1 + 0.05), // Position vertically (high up)
+            radius: canvasWidth * (Math.random() * 0.05 + 0.08), // Size relative to canvas
+            hue: Math.random() * 360, // Random base color
+            rotation: Math.random() * Math.PI * 2,
+            rings: Math.random() > 0.5 // Does it have rings?
+         };
+    }
+
+    function drawStars() {
+        starLayers.forEach((layer, index) => {
+            const parallaxOffset = (player.x * -layer[0]?.speed * 0.1) % canvasWidth; // Calculate parallax based on player X
+            layer.forEach(star => {
+                const drawX = (star.x + parallaxOffset + canvasWidth) % canvasWidth; // Wrap stars horizontally
+                const twinkle = 0.8 + Math.sin(gameTime * 0.0005 * (index + 1) + star.x) * 0.2; // Slower, layered twinkle
+                ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha * twinkle})`;
+                ctx.beginPath();
+                ctx.arc(drawX, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        });
+    }
+
+    function drawDistantPlanet() {
+        if (!distantPlanet.radius) return;
+        ctx.save();
+        ctx.translate(distantPlanet.x, distantPlanet.y);
+        ctx.rotate(distantPlanet.rotation);
+
+        // Planet Body Gradient
+        const gradient = ctx.createRadialGradient(-distantPlanet.radius*0.2, -distantPlanet.radius*0.3, distantPlanet.radius*0.1, 0, 0, distantPlanet.radius);
+        gradient.addColorStop(0, `hsla(${distantPlanet.hue}, 60%, 70%, 1)`); // Highlight color
+        gradient.addColorStop(0.8, `hsla(${distantPlanet.hue}, 70%, 50%, 1)`); // Main color
+        gradient.addColorStop(1, `hsla(${distantPlanet.hue}, 80%, 30%, 1)`); // Shadow color
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(0, 0, distantPlanet.radius, 0, Math.PI * 2);
+        ctx.fill();
+
+         // Optional Rings
+         if (distantPlanet.rings) {
+             ctx.strokeStyle = `hsla(${distantPlanet.hue + 30}, 40%, 60%, 0.5)`; // Slightly different color, semi-transparent
+             ctx.lineWidth = distantPlanet.radius * 0.1;
+             ctx.beginPath();
+             ctx.ellipse(0, 0, distantPlanet.radius * 1.5, distantPlanet.radius * 0.4, 0, 0, Math.PI * 2);
+             ctx.stroke();
+              ctx.strokeStyle = `hsla(${distantPlanet.hue - 30}, 40%, 40%, 0.3)`;
+              ctx.lineWidth = distantPlanet.radius * 0.05;
+              ctx.beginPath();
+              ctx.ellipse(0, 0, distantPlanet.radius * 1.7, distantPlanet.radius * 0.5, 0, 0, Math.PI * 2);
+              ctx.stroke();
+         }
+
+        ctx.restore();
+    }
+
+
+    function drawBackground() {
+        // Deep Space Background Gradient
+        const bgGradient = ctx.createLinearGradient(0, 0, 0, canvasHeight);
+        bgGradient.addColorStop(0, '#000510'); // Top: Very dark blue/black
+        bgGradient.addColorStop(0.5, '#101528'); // Mid: Dark purple/blue
+        bgGradient.addColorStop(1, '#202840'); // Bottom: Muted blue/grey (haze)
+        ctx.fillStyle = bgGradient;
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+        drawDistantPlanet(); // Draw planet behind stars
+        drawStars(); // Draw parallax stars
+
+        // Alien Terrain (multi-layered, jagged)
+        const terrainColors = ['#403850', '#302840', '#201830']; // Dark purples/greys
+        const baseHeight = canvasHeight * 0.85;
+        const amplitude = canvasHeight * 0.08;
+        const frequency = 3; // How many peaks/valleys
+
+        for (let layer = 0; layer < terrainColors.length; layer++) {
+            ctx.fillStyle = terrainColors[layer];
+            ctx.beginPath();
+            ctx.moveTo(0, canvasHeight);
+            const layerOffset = layer * canvasHeight * 0.03; // Vertical offset per layer
+            const layerAmplitude = amplitude * (1 - layer * 0.2); // Less variation further back
+            const layerFreq = frequency * (1 + layer * 0.1);
+
+            for (let x = 0; x <= canvasWidth; x += 10) {
+                const jaggedness = (Math.random() - 0.5) * 15 * (1 - layer * 0.3); // Add random jaggedness
+                const y = baseHeight + layerOffset + Math.sin(x / canvasWidth * layerFreq * Math.PI * 2 + layer * 0.5) * layerAmplitude + jaggedness;
+                ctx.lineTo(x, y);
+            }
+            ctx.lineTo(canvasWidth, canvasHeight);
+            ctx.closePath();
+            ctx.fill();
+        }
+         // Foreground ground (slightly more detail)
+         ctx.fillStyle = '#453540'; // Dark brownish purple
+         ctx.fillRect(0, canvasHeight - 15, canvasWidth, 15);
+          for(let i=0; i< canvasWidth; i++){
+              ctx.fillStyle = Math.random() > 0.7 ? `rgba(100,80,90, ${Math.random()*0.3})` : `rgba(50,40,45, ${Math.random()*0.4})`;
+              ctx.fillRect(i, canvasHeight - 15 + Math.random()*15, 1, Math.random()*3+1); // Small vertical noise/rocks
+          }
+    }
+
+    function drawPlayer(p) {
+        const bodyW = p.width;
+        const bodyH = p.height;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+
+        // --- Engine Heat Distortion (Subtle) ---
+         if (thrusting && fuel > 0) {
+            const distortAmount = Math.sin(gameTime * 0.1) * 0.5 + 1; // Pulsing amount
+             // This is complex to do well in canvas, faking with wavy lines below
+             ctx.strokeStyle = `rgba(180, 200, 255, ${0.1 + Math.random()*0.1})`;
+             ctx.lineWidth = 1;
+             for(let i=0; i< 3; i++) {
+                 ctx.beginPath();
+                 ctx.moveTo(-bodyW * 0.3, bodyH/2 + 2 + i*2);
+                 ctx.quadraticCurveTo(0, bodyH/2 + 15 + Math.random()*10, bodyW * 0.3, bodyH/2 + 2 + i*2);
+                 ctx.stroke();
+             }
         }
 
-        async function getVideoInfo() {
-            const url = videoUrlInput.value.trim();
-            clearResults();
 
-            if (!url) { displayStatus('Please enter a YouTube video URL.', 'error'); return; }
-            const videoId = getVideoId(url);
-            if (!videoId) { displayStatus('Could not extract a valid YouTube Video ID from the URL.', 'error'); return; }
+        // --- Thruster Flame ---
+        if (thrusting && fuel > 0) {
+            const flameBaseWidth = bodyW / 3;
+            const flameHeight = bodyH * 0.6 + Math.random() * bodyH * 0.4; // More variable height
+            const coreHeight = flameHeight * 0.7;
 
-            displayStatus('Fetching video details...', 'loading');
-            extractButton.disabled = true;
+            // Outer Glow (Wider, Blueish)
+            const glowRadius = flameHeight * 1.2;
+            const glowGradient = ctx.createRadialGradient(0, bodyH/2 + coreHeight*0.5, 2, 0, bodyH/2 + coreHeight*0.6, glowRadius);
+            glowGradient.addColorStop(0, `rgba(180, 220, 255, 0.6)`);
+            glowGradient.addColorStop(0.5, `rgba(100, 150, 255, 0.2)`);
+            glowGradient.addColorStop(1, `rgba(80, 120, 200, 0)`);
+            ctx.fillStyle = glowGradient;
+            ctx.fillRect(-glowRadius*0.8, bodyH/2, glowRadius*1.6, glowRadius*1.1);
 
-            // Request snippet, statistics, contentDetails, status
-            const parts = 'snippet,statistics,contentDetails,status';
-            const apiUrl = `https://www.googleapis.com/youtube/v3/videos?part=${parts}&id=${videoId}&key=${apiKey}`;
+            // Inner Flame Core (Intense Orange/White)
+            const flameGradient = ctx.createLinearGradient(0, bodyH/2, 0, bodyH/2 + coreHeight);
+            flameGradient.addColorStop(0, 'rgba(255, 255, 255, 1)'); // White hot center
+            flameGradient.addColorStop(0.2, 'rgba(255, 255, 200, 1)');
+            flameGradient.addColorStop(0.6, 'rgba(255, 180, 0, 0.9)'); // Orange
+            flameGradient.addColorStop(1, 'rgba(255, 100, 0, 0.3)'); // Fainter tip
+            ctx.fillStyle = flameGradient;
+            ctx.beginPath();
+            ctx.moveTo(-flameBaseWidth / 2, bodyH / 2);
+            // Jagged flame edges
+            ctx.lineTo(flameBaseWidth * 0.1, bodyH / 2 + coreHeight * 0.3 + Math.random() * 5);
+            ctx.lineTo(-flameBaseWidth * 0.2, bodyH / 2 + coreHeight * 0.6 + Math.random() * 5);
+            ctx.lineTo(0, bodyH / 2 + coreHeight); // Pointy tip
+            ctx.lineTo(flameBaseWidth * 0.2, bodyH / 2 + coreHeight * 0.6 + Math.random() * 5);
+            ctx.lineTo(-flameBaseWidth * 0.1, bodyH / 2 + coreHeight * 0.3 + Math.random() * 5);
+            ctx.lineTo(flameBaseWidth / 2, bodyH / 2);
+            ctx.closePath();
+            ctx.fill();
 
-            try {
-                const response = await fetch(apiUrl);
-                const data = await response.json();
-
-                if (!response.ok) {
-                     let errorMessage = `API Error (${response.status})`; if (data?.error?.message) { errorMessage += `: ${data.error.message}`; } else { errorMessage += `. ${response.statusText || 'Unknown API error'}`; } if (response.status === 403) { errorMessage += " Check API key validity or quota."; } throw new Error(errorMessage);
-                }
-
-                if (data.items && data.items.length > 0) {
-                    const video = data.items[0];
-                    const snippet = video.snippet || {};
-                    const stats = video.statistics || {};
-                    const details = video.contentDetails || {};
-                    const status = video.status || {};
-
-                    currentTags = snippet.tags || [];
-                    hideStatus();
-                    resultsDiv.innerHTML = ''; // Clear previous results
-
-                    // --- Build Results HTML ---
-
-                    // 1. Main Info Section (Thumbnail, Title, Channel, Basic Stats)
-                    const mainInfoSection = document.createElement('div');
-                    mainInfoSection.className = 'result-section video-main-info';
-
-                    // Thumbnail
-                    const thumbDiv = document.createElement('div');
-                    thumbDiv.className = 'video-thumbnail';
-                    const thumbUrl = snippet.thumbnails?.medium?.url || snippet.thumbnails?.default?.url || ''; // Get best available thumbnail
-                    if (thumbUrl) {
-                        const img = document.createElement('img');
-                        img.src = thumbUrl;
-                        img.alt = `Thumbnail for ${snippet.title || 'video'}`;
-                        thumbDiv.appendChild(img);
-                    }
-                    mainInfoSection.appendChild(thumbDiv);
-
-                    // Details Column
-                    const detailsDiv = document.createElement('div');
-                    detailsDiv.className = 'video-details-main';
-
-                    const titleElement = document.createElement('h3'); // Use h3 for title in results
-                    titleElement.id = 'videoTitle';
-                    titleElement.textContent = snippet.title || 'N/A';
-                    detailsDiv.appendChild(titleElement);
-
-                     const channelElement = document.createElement('p');
-                     channelElement.className = 'video-channel';
-                     if (snippet.channelTitle && snippet.channelId) {
-                         channelElement.innerHTML = `By: <a href="https://www.youtube.com/channel/${snippet.channelId}" target="_blank" rel="noopener noreferrer">${snippet.channelTitle}</a>`;
-                     } else {
-                          channelElement.textContent = `Channel: ${snippet.channelTitle || 'N/A'}`;
-                     }
-                    detailsDiv.appendChild(channelElement);
-
-                    const statsList = document.createElement('ul');
-                    statsList.className = 'stats-list';
-                    statsList.innerHTML = `
-                        <li><span class="icon-eye" title="Views"></span><strong>${formatNumber(stats.viewCount)}</strong> Views</li>
-                        <li><span class="icon-thumbs-up" title="Likes"></span><strong>${formatNumber(stats.likeCount) || 'Likes Hidden'}</strong> Likes</li>
-                        <li><span class="icon-comment" title="Comments"></span><strong>${formatNumber(stats.commentCount) || 'Comments Disabled'}</strong> Comments</li>
-                        <li><span class="icon-calendar" title="Published Date"></span>Published: <strong>${formatIsoDate(snippet.publishedAt)}</strong></li>
-                        <li><span class="icon-clock" title="Duration"></span>Duration: <strong>${formatIsoDuration(details.duration)}</strong></li>
-                    `;
-                    detailsDiv.appendChild(statsList);
-                    mainInfoSection.appendChild(detailsDiv);
-                    resultsDiv.appendChild(mainInfoSection);
-
-
-                    // 2. Description Section
-                    const descriptionSection = document.createElement('div');
-                    descriptionSection.className = 'result-section description-container';
-                    descriptionSection.innerHTML = `<h3>Description</h3>`;
-                    const descriptionContent = document.createElement('pre');
-                    descriptionContent.id = 'videoDescription';
-                    descriptionContent.textContent = snippet.description ? snippet.description.trim() : 'No description provided.';
-                    descriptionSection.appendChild(descriptionContent);
-                    resultsDiv.appendChild(descriptionSection);
-
-                    // 3. Tags Section
-                    const tagsSection = document.createElement('div');
-                    tagsSection.className = 'result-section tags-container';
-                    const tagsHeaderDiv = document.createElement('div');
-                    tagsHeaderDiv.className = 'tags-header';
-                    tagsHeaderDiv.innerHTML = `<h4>Extracted Tags</h4>`; // h4 for sub-sub heading
-
-                    if (currentTags.length > 0) {
-                        const copyButton = document.createElement('button'); copyButton.id = 'copyButton'; copyButton.textContent = 'Copy Tags'; copyButton.onclick = copyTagsToClipboard;
-                        const copyFeedbackSpan = document.createElement('span'); copyFeedbackSpan.id = 'copyFeedback';
-                        const buttonWrapper = document.createElement('div'); buttonWrapper.style.display = 'flex'; buttonWrapper.style.alignItems = 'center';
-                        buttonWrapper.appendChild(copyButton); buttonWrapper.appendChild(copyFeedbackSpan);
-                        tagsHeaderDiv.appendChild(buttonWrapper);
-                        tagsSection.appendChild(tagsHeaderDiv);
-
-                        const tagList = document.createElement('ul'); tagList.className = 'tags-list';
-                        currentTags.forEach(tag => { const li = document.createElement('li'); li.className = 'tag-item'; li.textContent = tag; tagList.appendChild(li); });
-                        tagsSection.appendChild(tagList);
-                    } else {
-                        tagsSection.appendChild(tagsHeaderDiv);
-                        tagsSection.innerHTML += '<p style="font-size: 0.9rem; color: var(--dark-grey);">No tags found for this video.</p>';
-                    }
-                    resultsDiv.appendChild(tagsSection);
-
-                    // 4. Other Details Section
-                    const otherDetailsSection = document.createElement('div');
-                    otherDetailsSection.className = 'result-section other-details';
-                    otherDetailsSection.innerHTML = `<h3>Other Details</h3>`;
-                    const detailsList = document.createElement('dl');
-                    detailsList.className = 'details-list';
-                    detailsList.innerHTML = `
-                        <li><dt>Definition:</dt> <dd>${(details.definition || 'N/A').toUpperCase()}</dd></li>
-                        <li><dt>Captions:</dt> <dd>${details.caption === 'true' ? 'Available' : 'None'}</dd></li>
-                        <li><dt>License:</dt> <dd>${status.license === 'youtube' ? 'Standard YouTube' : 'Creative Commons'}</dd></li>
-                        <li><dt>Embeddable:</dt> <dd>${status.embeddable ? 'Yes' : 'No'}</dd></li>
-                        <li><dt>Public Stats:</dt> <dd>${status.publicStatsViewable ? 'Visible' : 'Hidden'}</dd></li>
-                    `;
-                    otherDetailsSection.appendChild(detailsList);
-                    resultsDiv.appendChild(otherDetailsSection);
-
-                    // 5. Monetization Info (Informational Only)
-                    const monetizationSection = document.createElement('div');
-                    monetizationSection.className = 'result-section monetization-info';
-                    monetizationSection.innerHTML = `
-                        <h3>Monetization Status</h3>
-                        <p><strong>Note:</strong> A reliable monetization check is not possible using only the public YouTube Data API. This API does not provide direct information on whether a video serves ads for the creator.</p>
-                    `;
-                    resultsDiv.appendChild(monetizationSection);
-
-
-                } else {
-                    displayStatus('Video not found. Please check the URL or Video ID.', 'error');
-                }
-
-            } catch (error) {
-                console.error("Error fetching video info:", error);
-                displayStatus(`An error occurred: ${error.message}`, 'error');
-            } finally {
-                 extractButton.disabled = false; // Re-enable button
+             // Thrust particles
+             if (Math.random() < 0.5) { // Emit particles sometimes
+                createParticle(p.x, p.y + bodyH/2, 'thrust');
             }
         }
 
-        function copyTagsToClipboard() { /* ... (keep function as is) ... */
-            if (currentTags.length === 0) return;
-            const tagsString = currentTags.join(', ');
-            const copyButton = document.getElementById('copyButton'); const feedbackSpan = document.getElementById('copyFeedback');
-            navigator.clipboard.writeText(tagsString).then(() => {
-                if(copyButton) copyButton.textContent = 'Copied!'; if(feedbackSpan) feedbackSpan.textContent = '✓';
-                setTimeout(() => { if(copyButton) copyButton.textContent = 'Copy Tags'; if(feedbackSpan) feedbackSpan.textContent = ''; }, 1500);
-            }).catch(err => {
-                console.error('Failed to copy tags: ', err); if(copyButton) copyButton.textContent = 'Failed'; if(feedbackSpan) feedbackSpan.textContent = 'Error!';
-                 setTimeout(() => { if(copyButton) copyButton.textContent = 'Copy Tags'; if(feedbackSpan) feedbackSpan.textContent = ''; }, 1500);
-            });
+        // --- Landing Gear ---
+        ctx.strokeStyle = '#90a0b0'; // Lighter metallic grey
+        ctx.lineWidth = 4;
+        const legAngle = Math.PI / 5;
+        const legLength = bodyH * 0.6;
+        const legStartX = bodyW * 0.3;
+        const legStartY = bodyH * 0.2;
+        const footSize = 8;
+        // Left Leg
+        ctx.beginPath(); ctx.moveTo(-legStartX, legStartY); ctx.lineTo(-legStartX - Math.cos(legAngle)*legLength, legStartY + Math.sin(legAngle)*legLength); ctx.stroke();
+        ctx.fillStyle = '#708090'; ctx.fillRect(-legStartX - Math.cos(legAngle)*legLength - footSize/2, legStartY + Math.sin(legAngle)*legLength - footSize/4, footSize, footSize/2);
+        // Right Leg
+        ctx.beginPath(); ctx.moveTo(legStartX, legStartY); ctx.lineTo(legStartX + Math.cos(legAngle)*legLength, legStartY + Math.sin(legAngle)*legLength); ctx.stroke();
+        ctx.fillStyle = '#708090'; ctx.fillRect(legStartX + Math.cos(legAngle)*legLength - footSize/2, legStartY + Math.sin(legAngle)*legLength - footSize/4, footSize, footSize/2);
+
+        // --- Main Body ---
+        const bodyGradient = ctx.createLinearGradient(0, -bodyH/2, 0, bodyH/2);
+        bodyGradient.addColorStop(0, '#d0d8e0'); // Lighter top
+        bodyGradient.addColorStop(0.5, '#a0a8b0'); // Mid tone
+        bodyGradient.addColorStop(1, '#707880'); // Darker bottom
+        ctx.fillStyle = bodyGradient;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, bodyW / 2, bodyH / 2.2, 0, 0, Math.PI * 2); // Main shape
+        ctx.fill();
+        ctx.strokeStyle = '#505860';
+        ctx.lineWidth = 1;
+        ctx.stroke(); // Subtle outline
+
+        // --- Running Lights ---
+        const lightState = Math.floor(gameTime * 0.003) % 2; // Blink state
+        ctx.fillStyle = lightState ? '#ff6060' : '#803030'; // Blinking Red Light
+        ctx.beginPath(); ctx.arc(-bodyW * 0.4, 0, 3, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = !lightState ? '#60ff60' : '#308030'; // Blinking Green Light (opposite)
+        ctx.beginPath(); ctx.arc(bodyW * 0.4, 0, 3, 0, Math.PI*2); ctx.fill();
+
+
+        // --- Cockpit ---
+        const cockpitRadius = bodyW / 2.8;
+        const cockpitY = -bodyH / 8;
+        const cockpitGradient = ctx.createRadialGradient(cockpitRadius * 0.2, cockpitY - cockpitRadius * 0.3, cockpitRadius * 0.1, 0, cockpitY, cockpitRadius);
+        cockpitGradient.addColorStop(0, 'rgba(180, 220, 255, 0.9)'); // Bright blueish highlight
+        cockpitGradient.addColorStop(0.7, 'rgba(80, 150, 200, 0.8)'); // Main blue tint
+        cockpitGradient.addColorStop(1, 'rgba(40, 80, 120, 0.8)'); // Darker edge
+        ctx.fillStyle = cockpitGradient;
+        ctx.beginPath(); ctx.arc(0, cockpitY, cockpitRadius, 0, Math.PI * 2); ctx.fill();
+        // Cockpit frame
+        ctx.strokeStyle = '#708090'; ctx.lineWidth = 2.5; ctx.stroke();
+
+        // --- Monkey (Simple silhouette against bright cockpit) ---
+        ctx.fillStyle = '#40281a'; // Dark brown silhouette
+        ctx.beginPath();
+        ctx.arc(0, cockpitY + cockpitRadius*0.1, cockpitRadius*0.5, 0, Math.PI*2); // Head
+        // Tiny ears
+        ctx.arc(-cockpitRadius*0.4, cockpitY - cockpitRadius*0.3, cockpitRadius*0.2, 0, Math.PI*2);
+        ctx.arc( cockpitRadius*0.4, cockpitY - cockpitRadius*0.3, cockpitRadius*0.2, 0, Math.PI*2);
+        ctx.fill();
+
+        ctx.restore();
+    }
+
+    function drawPlatform(pf) {
+        const platH = pf.height;
+        // Base Gradient
+        const baseGradient = ctx.createLinearGradient(pf.x, pf.y, pf.x, pf.y + platH);
+        baseGradient.addColorStop(0, '#607080'); // Darker grey-blue top
+        baseGradient.addColorStop(1, '#304050'); // Dark blue bottom
+        ctx.fillStyle = baseGradient;
+        ctx.fillRect(pf.x, pf.y, pf.width, platH);
+
+        // Top Surface Detail (grid lines)
+        ctx.strokeStyle = 'rgba(150, 180, 200, 0.2)';
+        ctx.lineWidth = 1;
+        for(let i = 1; i < 5; i++) {
+            ctx.beginPath(); ctx.moveTo(pf.x + i*pf.width/5, pf.y); ctx.lineTo(pf.x + i*pf.width/5, pf.y + platH * 0.8); ctx.stroke(); // Vertical
+        }
+         ctx.beginPath(); ctx.moveTo(pf.x, pf.y + platH*0.3); ctx.lineTo(pf.x + pf.width, pf.y + platH*0.3); ctx.stroke(); // Horizontal
+         ctx.beginPath(); ctx.moveTo(pf.x, pf.y + platH*0.6); ctx.lineTo(pf.x + pf.width, pf.y + platH*0.6); ctx.stroke();
+
+
+        // Landing Lights (Blinking)
+        const lightSize = platH * 0.3;
+        const lightY = pf.y + platH / 2 - lightSize / 2;
+        const blinkState = Math.floor(gameTime * 0.002) % 2;
+        if (blinkState) {
+            const lightGradient = ctx.createRadialGradient(0, 0, lightSize*0.1, 0, 0, lightSize*0.6);
+            lightGradient.addColorStop(0, '#ffffff');
+            lightGradient.addColorStop(0.5, '#a0d0ff');
+            lightGradient.addColorStop(1, 'rgba(100, 180, 255, 0.3)');
+
+            ctx.fillStyle = lightGradient;
+            // Left Light
+            ctx.save(); ctx.translate(pf.x + platH*0.5, lightY + lightSize/2);
+            ctx.beginPath(); ctx.arc(0, 0, lightSize/1.5, 0, Math.PI*2); ctx.fill(); ctx.restore();
+             // Right Light
+            ctx.save(); ctx.translate(pf.x + pf.width - platH*0.5, lightY + lightSize/2);
+            ctx.beginPath(); ctx.arc(0, 0, lightSize/1.5, 0, Math.PI*2); ctx.fill(); ctx.restore();
         }
 
-    </script>
+        // Edge Highlight
+        ctx.fillStyle = 'rgba(180, 210, 240, 0.6)';
+        ctx.fillRect(pf.x, pf.y, pf.width, 1.5); // Top edge
+
+        // Outline
+        ctx.strokeStyle = '#102030';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(pf.x, pf.y, pf.width, pf.height);
+    }
+
+    function drawBanana(b) { // Added subtle shading
+        if (b.collected) return;
+        const bananaW = b.width;
+        const bananaH = b.height;
+        ctx.save();
+        ctx.translate(b.x, b.y);
+        ctx.rotate(Math.PI / 8);
+
+        // Main Body Gradient
+        const bodyGradient = ctx.createLinearGradient(0, -bananaH/2, 0, bananaH/2);
+        bodyGradient.addColorStop(0, '#f8f060'); // Brighter top
+        bodyGradient.addColorStop(1, '#e0d040'); // Darker bottom
+        ctx.fillStyle = bodyGradient;
+        ctx.beginPath();
+        ctx.moveTo(-bananaW / 2, 0);
+        ctx.bezierCurveTo(-bananaW/2.5, -bananaH/1.5, bananaW/2.5, -bananaH/1.5, bananaW / 2, 0); // Top curve
+        ctx.bezierCurveTo(bananaW/2.5, bananaH/1.5, -bananaW/2.5, bananaH/1.5, -bananaW / 2, 0); // Bottom curve
+        ctx.fill();
+
+        // Highlight
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.beginPath();
+        ctx.ellipse(0, -bananaH*0.2, bananaW*0.3, bananaH*0.1, 0, 0, Math.PI*2);
+        ctx.fill();
+
+        // Brown Bits
+        ctx.fillStyle = '#603818';
+        ctx.fillRect(-bananaW / 2 - 1.5, -2, 3, 4);
+        ctx.fillRect(bananaW / 2 - 1.5, -2, 3, 4);
+
+        ctx.restore();
+    }
+
+    function drawHUD() { // Cleaner HUD
+        // Bar Background
+        ctx.fillStyle = 'rgba(15, 25, 45, 0.8)';
+        ctx.fillRect(0, 0, canvasWidth, 45);
+        // Top Highlight Line
+        ctx.fillStyle = 'rgba(100, 150, 200, 0.5)';
+        ctx.fillRect(0, 0, canvasWidth, 2);
+
+        // Text Style
+        ctx.fillStyle = '#c0d8ff'; // Lighter blue text
+        ctx.font = 'bold 16px Orbitron, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+        ctx.shadowBlur = 3;
+
+        // Score
+        ctx.fillText(`SCORE: ${score}`, 15, 23);
+
+        // Level & Lives (Center)
+        ctx.textAlign = 'center';
+        ctx.fillText(`LVL: ${currentLevelIndex + 1}/${TOTAL_LEVELS}   LIVES: ${'♥'.repeat(lives)}${'♡'.repeat(STARTING_LIVES-lives)}`, canvasWidth / 2, 23); // Using heart symbols
+
+        // Fuel Gauge (Right)
+        ctx.textAlign = 'right';
+        ctx.fillText('FUEL:', canvasWidth - 145, 23);
+        const fuelGaugeWidth = 110; const fuelGaugeHeight = 14;
+        const fuelX = canvasWidth - 130; const fuelY = 16;
+        // Background
+        ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(fuelX, fuelY, fuelGaugeWidth, fuelGaugeHeight);
+        // Fuel Fill
+        const fuelFill = Math.max(0, fuel * (fuelGaugeWidth / MAX_FUEL));
+        const fuelGradient = ctx.createLinearGradient(fuelX, 0, fuelX + fuelGaugeWidth, 0);
+        fuelGradient.addColorStop(0, '#ff5050'); fuelGradient.addColorStop(0.4, '#f0d040'); fuelGradient.addColorStop(1, '#50ff50');
+        ctx.fillStyle = fuelGradient; ctx.fillRect(fuelX, fuelY, fuelFill, fuelGaugeHeight); // Fill from left
+        // Border
+        ctx.strokeStyle = 'rgba(150, 180, 200, 0.7)'; ctx.lineWidth = 1; ctx.strokeRect(fuelX, fuelY, fuelGaugeWidth, fuelGaugeHeight);
+
+        ctx.shadowBlur = 0; // Reset shadow
+    }
+
+     function createParticle(x, y, type) { // Refined particles
+        const lifeBase = type === 'explosion' ? 70 : (type === 'thrust' ? 15 : 25);
+        const lifeVar = type === 'explosion' ? 40 : (type === 'thrust' ? 10 : 15);
+        const life = Math.random() * lifeVar + lifeBase;
+        const speedBase = type === 'explosion' ? 7 : (type === 'thrust' ? 3 : 1.5);
+        const speedVar = type === 'explosion' ? 5 : (type === 'thrust' ? 2 : 1);
+        const speed = Math.random() * speedVar + (speedBase - speedVar/2);
+        const angle = type === 'thrust' ? (Math.PI * 0.4 + Math.random() * Math.PI * 0.2) : (Math.random() * Math.PI * 2); // Thrust points down
+        const gravityFactor = type === 'thrust' ? 0.1 : (type === 'dust' ? 0.8 : 0.4);
+
+        const particle = {
+            x: x + (Math.random() - 0.5) * (type === 'thrust' ? 5 : 10),
+            y: y + (Math.random() - 0.5) * 5,
+            vx: Math.cos(angle) * speed * (type === 'thrust' ? 0.3 : 1) + (type === 'thrust' ? player.vx * 0.2 : 0), // Inherit some player vel for thrust
+            vy: Math.sin(angle) * speed + (type === 'thrust' ? player.vy * 0.2 : 0),
+            life: life, maxLife: life, type: type,
+            size: type === 'explosion' ? Math.random() * 7 + 3 : (type === 'thrust' ? Math.random()*2+1 : Math.random() * 3 + 2),
+            color: type === 'explosion' ? (Math.random()>0.3 ? `255, ${Math.floor(Math.random()*120+100)}, 0,` : `220, 0, 0,`)
+                 : type === 'thrust' ? (Math.random()>0.5 ? `255, 255, 200,` : `255, 180, 50,`) // White/Yellow sparks
+                 : type === 'collect' ? `200, 255, 100,` // Greenish yellow for collect
+                 : `160, 140, 120,`, // Dust color
+            gravityFactor: gravityFactor,
+            rotation: Math.random() * Math.PI * 2,
+            spin: (Math.random() - 0.5) * 0.1
+        };
+        particles.push(particle);
+    }
+
+    function updateParticles() { // Update with gravity factor
+        for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+            p.x += p.vx; p.y += p.vy;
+            p.vy += GRAVITY * p.gravityFactor; // Apply varying gravity
+            p.vx *= 0.97; p.vy *= 0.97; // Air resistance
+            p.life--; p.rotation += p.spin;
+            if (p.life <= 0) particles.splice(i, 1);
+        }
+    }
+
+    function drawParticles() { // Draw slightly fancier particles
+        particles.forEach(p => {
+            const alpha = Math.max(0, p.life / p.maxLife).toFixed(2);
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rotation);
+            ctx.fillStyle = `rgba(${p.color}${alpha})`;
+            if (p.type === 'explosion' || p.type === 'thrust') { // Sparks are squares
+                 ctx.shadowColor = `rgba(${p.color}0.7)`;
+                 ctx.shadowBlur = p.size * 0.8;
+                 ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                 ctx.shadowBlur = 0;
+            } else { // Dust/Collect are circles
+                 ctx.beginPath(); ctx.arc(0, 0, p.size/2, 0, Math.PI*2); ctx.fill();
+            }
+            ctx.restore();
+        });
+    }
+
+    // --- Game Logic --- (Mostly same, adjusted landing/crash)
+    function resetPlayer(startPosInput) { /* ... (Same clamping logic) ... */ const P_WIDTH=38, P_HEIGHT=32; let startX=startPosInput.x, startY=startPosInput.y; if(startX<P_WIDTH/2)startX=P_WIDTH/2; if(startX>canvasWidth-P_WIDTH/2)startX=canvasWidth-P_WIDTH/2; if(startY<P_HEIGHT/2)startY=P_HEIGHT/2; if(startY>canvasHeight-P_HEIGHT/2)startY=canvasHeight-P_HEIGHT/2; player={ x:startX, y:startY, vx:0, vy:0, width:P_WIDTH, height:P_HEIGHT, landed:false, crashed:false }; fuel=MAX_FUEL; thrusting=false; particles=[]; screenShake.duration = 0; }
+    function loadLevel(levelIdx) { /* ... (Same level loading, clamping) ... */ if(levelIdx>=TOTAL_LEVELS){gameState='gameWon'; showMessage(`MISSION ACCOMPLISHED!\nFinal Score: ${score}`,setupMenu); return;} currentLevelIndex=levelIdx; const ld=levels[currentLevelIndex]; platform={ width:ld.platform.width, height:ld.platform.height, x:ld.platform.xRatio*canvasWidth-ld.platform.width/2, y:canvasHeight-ld.platform.yOffset-ld.platform.height }; if(platform.x<0)platform.x=0; if(platform.x+platform.width>canvasWidth)platform.x=canvasWidth-platform.width; bananas=ld.bananas.map(b=>({ x:b.xRatio*canvasWidth, y:b.yRatio*canvasHeight, width:20, height:20, collected:false })); bananas.forEach(b=>{ b.x=Math.max(b.width/2,Math.min(canvasWidth-b.width/2,b.x)); b.y=Math.max(b.height/2,Math.min(canvasHeight-b.height/2-20,b.y)); }); resetPlayer(ld.startPos); gameState='playing'; hideMessage(); }
+    function updatePlayer() { /* ... (Same physics update) ... */ if(player.landed||player.crashed)return; player.vy+=GRAVITY; thrusting=false; if(input.up&&fuel>0){player.vy-=THRUST_POWER; fuel-=FUEL_CONSUMPTION; thrusting=true;} if(input.left&&fuel>0){player.vx-=LATERAL_THRUST; fuel-=FUEL_CONSUMPTION/3;} if(input.right&&fuel>0){player.vx+=LATERAL_THRUST; fuel-=FUEL_CONSUMPTION/3;} fuel=Math.max(0,fuel); player.vx*=FRICTION; player.vy*=FRICTION; player.x+=player.vx; player.y+=player.vy; checkCollisions(); }
+    function checkCollisions() { /* ... (Mostly same collision logic, adjusted effects) ... */ let bounced=false; const P_W=player.width, P_H=player.height; if(player.x-P_W/2<0){player.vx*=-.3; player.x=P_W/2; bounced=true;} else if(player.x+P_W/2>canvasWidth){player.vx*=-.3; player.x=canvasWidth-P_W/2; bounced=true;} if(player.y-P_H/2.5<0){player.vy*=-.3; player.y=P_H/2.5; bounced=true;} if(bounced)handleCrashMaybe(Math.max(Math.abs(player.vx),Math.abs(player.vy))); const feetXL=player.x-P_W/1.8, feetXR=player.x+P_W/1.8, feetY=player.y+P_H/2+6, pBot=player.y+P_H/2; const onPX=(feetXL>platform.x&&feetXL<platform.x+platform.width)||(feetXR>platform.x&&feetXR<platform.x+platform.width); if(onPX&&feetY>=platform.y&&pBot<platform.y+15){ /* Increased tolerance slightly */ if(Math.abs(player.vy)<=MAX_LANDING_SPEED_Y&&Math.abs(player.vx)<=MAX_LANDING_SPEED_X){ if(!player.landed){ player.landed=true; player.vy=0; player.vx=0; player.y=platform.y-P_H/2-6; gameState='landed'; score+=LANDING_BONUS; score+=Math.floor(fuel*FUEL_BONUS_MULTIPLIER); for(let i=0;i<15;i++)createParticle(player.x+(Math.random()-.5)*P_W*0.8,feetY,'dust'); const nextL=currentLevelIndex+1; if(nextL<TOTAL_LEVELS){showMessage(`Level ${currentLevelIndex+1} Complete!\nScore: ${score}`,()=>loadLevel(nextL));} else {gameState='gameWon'; showMessage(`MISSION ACCOMPLISHED!\nFinal Score: ${score}`,setupMenu);} } } else { handleCrashMaybe(Math.max(Math.abs(player.vy),Math.abs(player.vx))); } } else if(feetY>=canvasHeight){ handleCrashMaybe(player.vy); } bananas.forEach(banana=>{ if(!banana.collected){ const dx=player.x-banana.x, dy=player.y-banana.y, dist=Math.sqrt(dx*dx+dy*dy); if(dist<P_W/1.8+banana.width/2){ /* Adjusted collision radius */ banana.collected=true; score+=BANANA_POINTS; for(let i=0;i<8;i++)createParticle(banana.x,banana.y,'collect'); } } }); }
+    function handleCrashMaybe(impactSpeed) { // Added screen shake
+        const feetY = player.y+player.height/2+6;
+        if (!player.crashed && !player.landed && Math.abs(impactSpeed) > 0.15) { // Slightly higher threshold for crash
+            player.crashed = true; gameState = 'crashed'; lives--; thrusting = false;
+            triggerScreenShake(8, 30); // Intensity 8, duration 30 frames
+            for(let i=0;i<40;i++)createParticle(player.x, player.y, 'explosion'); // More explosion particles
+
+            if (lives <= 0) {
+                gameState = 'gameOver'; setTimeout(()=>{ showMessage(`MISSION FAILED!\nFinal Score: ${score}`, setupMenu); }, 1000); // Longer delay
+            } else {
+                setTimeout(()=>{ showMessage(`CRITICAL DAMAGE!\nLives Left: ${lives}`, ()=>{ const ld = levels[currentLevelIndex]; resetPlayer(ld.startPos); gameState = 'playing'; hideMessage(); }); }, 1000);
+            }
+        } else if (!player.crashed && !player.landed && feetY >= canvasHeight) { // Ground hit (dust only)
+            for(let i=0; i<15; i++) createParticle(player.x + (Math.random()-0.5)*player.width, feetY, 'dust');
+             if(Math.abs(impactSpeed) > 0.5) triggerScreenShake(3, 15); // Gentle shake on hard ground hit
+        }
+    }
+     function triggerScreenShake(intensity, duration) {
+        screenShake.intensity = intensity;
+        screenShake.duration = duration;
+    }
+    function applyScreenShake() {
+        if (screenShake.duration > 0) {
+            const sx = (Math.random() - 0.5) * screenShake.intensity * (screenShake.duration / 15); // Fade shake
+            const sy = (Math.random() - 0.5) * screenShake.intensity * (screenShake.duration / 15);
+            ctx.translate(sx, sy);
+            screenShake.duration--;
+        }
+    }
+    function updateBackground() { gameTime++; /* only used for animations now */ } // simplified, parallax handled in drawStars
+
+    // --- Show/Hide Message --- (same)
+    function showMessage(text, callback) { messageText.innerText=text; messageCallback=callback; messageOverlay.style.display='flex'; }
+    function hideMessage() { messageOverlay.style.display='none'; }
+    messageButton.onclick = () => { hideMessage(); if(messageCallback){ messageCallback(); messageCallback=null; } };
+
+    // --- Main Draw Function ---
+    function draw() {
+        ctx.save(); // Save context for screen shake
+        applyScreenShake(); // Apply shake translation if active
+
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight); // Clear
+        drawBackground(); // Draw background first
+        drawParticles(); // Draw particles
+
+        if (gameState !== 'menu' && gameState !== 'gameOver' && gameState !== 'gameWon') {
+            drawPlatform(platform);
+            bananas.forEach(drawBanana);
+            if (!player.crashed || lives <= 0) { // Draw player unless mid-crash
+                 drawPlayer(player);
+            }
+            drawHUD();
+        } else if (gameState === 'menu') {
+             // Draw Menu Text (Improved Style)
+             ctx.fillStyle = 'rgba(0, 5, 15, 0.8)'; ctx.fillRect(0, 0, canvasWidth, canvasHeight); // Dark overlay
+             ctx.fillStyle = '#e0f0ff'; ctx.textAlign = 'center';
+             ctx.font = 'bold 48px Orbitron, sans-serif'; ctx.shadowColor = '#80c0ff'; ctx.shadowBlur = 15;
+             ctx.fillText('PLANET LANDER', canvasWidth / 2, canvasHeight / 2 - 80);
+             ctx.font = 'bold 28px Orbitron, sans-serif'; ctx.shadowBlur = 10;
+             ctx.fillText('DELUXE', canvasWidth / 2, canvasHeight / 2 - 35);
+             ctx.font = '22px Orbitron, sans-serif'; ctx.shadowBlur = 8;
+             ctx.fillText('Tap Screen or Press Enter to Start', canvasWidth / 2, canvasHeight / 2 + 40);
+             ctx.font = '16px Orbitron, sans-serif'; ctx.shadowBlur = 5;
+             ctx.fillText('Use Arrow Keys or Touch Controls', canvasWidth / 2, canvasHeight / 2 + 80);
+             ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+        }
+        // HTML overlay handles other messages
+
+        ctx.restore(); // Restore context after screen shake
+    }
+
+    // --- Game Loop ---
+    function gameLoop() {
+        if (gameState === 'playing') updatePlayer();
+        updateBackground(); updateParticles(); // Update effects
+        draw(); requestAnimationFrame(gameLoop);
+    }
+
+    // --- Input Handling --- (Mostly Same)
+    function handleKeyDown(e) { if(messageOverlay.style.display==='flex'){if(e.key==='Enter')messageButton.click(); return;} if(gameState==='menu'&&(e.key==='Enter'||e.key===' ')){loadLevel(0); return;} if(gameState!=='playing')return; switch(e.key){ case 'ArrowUp': case 'w': case ' ': input.up=true; break; case 'ArrowLeft': case 'a': input.left=true; break; case 'ArrowRight': case 'd': input.right=true; break; } if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault(); }
+    function handleKeyUp(e) { if(messageOverlay.style.display==='flex'||gameState!=='playing')return; switch(e.key){ case 'ArrowUp': case 'w': case ' ': input.up=false; break; case 'ArrowLeft': case 'a': input.left=false; break; case 'ArrowRight': case 'd': input.right=false; break; } }
+    function setupTouchControls() { controlsDiv.style.display='flex'; /* Use flex display */ controlsDiv.style.justifyContent = 'space-between'; /* Space out buttons */ controlsDiv.style.padding = '0 20px'; /* Padding on sides */ /* Event listeners same */ leftBtn.addEventListener('touchstart',(e)=>{if(gameState==='playing'){e.preventDefault();input.left=true;}},{passive:false}); leftBtn.addEventListener('touchend',(e)=>{if(gameState==='playing'){e.preventDefault();input.left=false;}},{passive:false}); leftBtn.addEventListener('touchcancel',(e)=>{if(gameState==='playing'){input.left=false;}},{passive:false}); rightBtn.addEventListener('touchstart',(e)=>{if(gameState==='playing'){e.preventDefault();input.right=true;}},{passive:false}); rightBtn.addEventListener('touchend',(e)=>{if(gameState==='playing'){e.preventDefault();input.right=false;}},{passive:false}); rightBtn.addEventListener('touchcancel',(e)=>{if(gameState==='playing'){input.right=false;}},{passive:false}); thrustBtn.addEventListener('touchstart',(e)=>{if(gameState==='playing'){e.preventDefault();input.up=true;}},{passive:false}); thrustBtn.addEventListener('touchend',(e)=>{if(gameState==='playing'){e.preventDefault();input.up=false;}},{passive:false}); thrustBtn.addEventListener('touchcancel',(e)=>{if(gameState==='playing'){input.up=false;}},{passive:false}); controlsDiv.addEventListener('contextmenu',(e)=>e.preventDefault()); }
+
+    // --- Initialization ---
+    function resizeCanvas() { // Uses gameContainer for sizing now
+        const aspectRatio = 800 / 600;
+        const controlsHeight = isTouchDevice() ? 100 : 0; // Allow for controls + margin
+        let availableWidth = window.innerWidth;
+        let availableHeight = window.innerHeight;
+
+        let targetCanvasHeight = availableHeight - controlsHeight;
+        let targetCanvasWidth = availableWidth;
+
+        if (targetCanvasWidth / targetCanvasHeight > aspectRatio) {
+             targetCanvasWidth = targetCanvasHeight * aspectRatio;
+        } else {
+             targetCanvasHeight = targetCanvasWidth / aspectRatio;
+        }
+        targetCanvasWidth = Math.min(targetCanvasWidth, availableWidth - 4);
+        targetCanvasHeight = Math.min(targetCanvasHeight, availableHeight - controlsHeight - 4);
+
+        canvas.width = Math.max(320, targetCanvasWidth);
+        canvas.height = Math.max(240, targetCanvasHeight);
+
+        // Size container to fit canvas exactly, flexbox handles controls below
+        gameContainer.style.width = `${canvas.width}px`;
+        gameContainer.style.height = `${canvas.height + controlsHeight}px`; // Set explicit height
+
+
+        canvasWidth = canvas.width; canvasHeight = canvas.height;
+
+        createStars(); // Recreate stars for new size
+        createDistantPlanet(); // Reposition planet
+
+         if (gameState !== 'menu') { // Reload level, clamp positions
+            const currentScore=score; const currentLives=lives;
+            const ld=levels[currentLevelIndex];
+            if(ld.startPos.x>canvasWidth-player.width/2)ld.startPos.x=canvasWidth-player.width/2; if(ld.startPos.y>canvasHeight-player.height/2)ld.startPos.y=canvasHeight-player.height/2;
+            loadLevel(currentLevelIndex);
+            score=currentScore; lives=currentLives;
+            if(gameState==='crashed'||gameState==='landed'||gameState==='gameWon'||gameState==='gameOver'){gameState='playing'; hideMessage();}
+         }
+    }
+    function isTouchDevice() { return (('ontouchstart' in window)||(navigator.maxTouchPoints > 0)||(navigator.msMaxTouchPoints > 0)); }
+    function setupMenu() { gameState='menu'; currentLevelIndex=0; score=0; lives=STARTING_LIVES; input={left:false,right:false,up:false}; hideMessage(); particles=[]; screenShake.duration=0;}
+
+    function init() {
+        if (isTouchDevice()) { setupTouchControls(); }
+        else { controlsDiv.style.display = 'none'; }
+        window.addEventListener('keydown', handleKeyDown); window.addEventListener('keyup', handleKeyUp);
+        const startHandler=(e)=>{ if(gameState==='menu'){e.preventDefault();loadLevel(0);} else if(messageOverlay.style.display==='flex'){messageButton.click();} };
+        canvas.addEventListener('click', startHandler); canvas.addEventListener('touchend', startHandler);
+        window.addEventListener('resize', resizeCanvas);
+        setupMenu(); resizeCanvas(); // Resize must be after setupMenu to init background correctly
+        gameLoop();
+    }
+    window.onload = init;
+
+</script>
+
 </body>
 </html>
